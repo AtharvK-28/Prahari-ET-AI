@@ -2,8 +2,9 @@
 import { create } from "zustand";
 import { api, WS_URL } from "./lib/api";
 import type {
-  CorridorState, DecisionBrief, ScenarioImpact, ProcurementPlan,
-  Signal, SPRSchedule, SystemStatus, TwinGeoJSON,
+  CorridorState, CorridorWeather, DecisionBrief, ProcurementPlan,
+  ScenarioImpact, ShockCalibration, Signal, SPRSchedule, SystemStatus,
+  TwinGeoJSON,
 } from "./lib/types";
 
 interface Stage {
@@ -30,6 +31,8 @@ interface PrahariState {
   loopElapsed: number;
   tab: "risk" | "scenario" | "plan";
   wsConnected: boolean;
+  calibration: ShockCalibration | null;
+  weather: Record<string, CorridorWeather>;
 
   boot: () => Promise<void>;
   select: (id: string | null) => void;
@@ -60,6 +63,8 @@ export const useStore = create<PrahariState>((set, get) => ({
   loopElapsed: 0,
   tab: "risk",
   wsConnected: false,
+  calibration: null,
+  weather: {},
 
   boot: async () => {
     const [status, twin, corridorsRes, recent] = await Promise.all([
@@ -69,11 +74,20 @@ export const useStore = create<PrahariState>((set, get) => ({
     corridorsRes.corridors.forEach((c) => (corridors[c.corridor_id] = c));
     set({ status, twin, corridors, signals: recent.signals.slice().reverse() });
     connectWS(set, get);
-    // periodic refresh of status + vessels (AIS overlay)
+    // calibration + weather warm up server-side; retry until present
+    const loadAux = async () => {
+      try {
+        const [cal, w] = await Promise.all([api.calibration(), api.weather()]);
+        set({ calibration: cal, weather: w.corridors });
+        if (!cal.all_moves_pct?.length) setTimeout(loadAux, 15000);
+      } catch { setTimeout(loadAux, 15000); }
+    };
+    loadAux();
+    // periodic refresh of status + vessels (AIS overlay) + weather
     setInterval(async () => {
       try {
-        const [s, v] = await Promise.all([api.status(), api.vessels()]);
-        set({ status: s, vessels: v.vessels });
+        const [s, v, w] = await Promise.all([api.status(), api.vessels(), api.weather()]);
+        set({ status: s, vessels: v.vessels, weather: w.corridors });
       } catch { /* backend briefly away — keep last state (NFR4) */ }
     }, 30000);
     // loop timer tick

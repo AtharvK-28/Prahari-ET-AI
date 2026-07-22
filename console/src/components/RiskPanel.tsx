@@ -9,6 +9,7 @@ const BAND_CLASS: Record<string, string> = {
 function CorridorRow({ c }: { c: CorridorState }) {
   const select = useStore((s) => s.select);
   const selected = useStore((s) => s.selectedCorridor);
+  const weather = useStore((s) => s.weather[c.corridor_id]);
   const open = selected === c.corridor_id;
 
   return (
@@ -31,6 +32,12 @@ function CorridorRow({ c }: { c: CorridorState }) {
             <span>baseline <b>{c.baseline_risk.toFixed(2)}</b></span>
             {c.lead_time_hours && (
               <span className="lead-time">⏱ warning window <b>{c.lead_time_hours[0]}–{c.lead_time_hours[1]}h</b></span>
+            )}
+            {weather && (
+              <span title="live sea state along route (Open-Meteo Marine)">
+                🌊 sea state <b>{weather.max_wave_m} m</b>
+                {weather.delay_factor > 1 && <b className="weather-hot"> · ETA ×{weather.delay_factor}</b>}
+              </span>
             )}
           </div>
           <div className="factors">

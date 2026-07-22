@@ -183,7 +183,9 @@ def approve(brief_id: str, payload: dict | None = None) -> dict:
 def calibration_shocks() -> dict:
     """Historical Brent shock episodes (FRED) grounding the Oracle's outputs."""
     from ..ingestion import fred
-    return {"calibration": fred.CALIBRATION, "shocks": fred.SHOCKS[-15:]}
+    return {"calibration": fred.CALIBRATION,
+            "all_moves_pct": [s["move_pct"] for s in fred.SHOCKS],
+            "recent": fred.SHOCKS[-8:]}
 
 
 @router.get("/weather")

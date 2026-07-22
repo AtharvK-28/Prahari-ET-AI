@@ -75,6 +75,8 @@ export interface Alternative {
   yield_penalty: number;
   supplier_reliability: number;
   reliability_source: "seed" | "eia_derived";
+  weather_delay_factor: number;
+  max_wave_m: number | null;
   score: number;
   feasible: boolean;
   exclusion_reason: string | null;
@@ -145,6 +147,25 @@ export interface SystemStatus {
   feeds: Record<string, string>;
   alert_threshold: number;
   signals_seen: number;
+}
+
+export interface ShockCalibration {
+  calibration: {
+    series: string;
+    years: number;
+    episodes: number;
+    median_shock_pct: number | null;
+    max_shock_pct: number | null;
+    note: string;
+  } | Record<string, never>;
+  all_moves_pct: number[];
+  recent: Array<{ start: string; end: string; from_usd: number; to_usd: number; move_pct: number }>;
+}
+
+export interface CorridorWeather {
+  max_wave_m: number;
+  delay_factor: number;
+  updated: number;
 }
 
 export type TwinGeoJSON = {

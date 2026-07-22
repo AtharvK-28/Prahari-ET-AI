@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useStore } from "../store";
 import ImpactView from "./ImpactView";
+import ShockCalibration from "./ShockCalibration";
 
 export default function ScenarioPanel() {
   const scenario = useStore((s) => s.scenario);
@@ -99,7 +100,12 @@ export default function ScenarioPanel() {
         </button>
       </div>
 
-      {scenario && <ImpactView impact={scenario} />}
+      {scenario && (
+        <>
+          <ImpactView impact={scenario} />
+          <ShockCalibration currentPct={scenario.brent_delta_pct} />
+        </>
+      )}
     </div>
   );
 }

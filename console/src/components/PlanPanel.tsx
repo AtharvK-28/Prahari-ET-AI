@@ -84,6 +84,12 @@ export default function PlanPanel() {
                     ⛴ reliability {a.supplier_reliability}
                     {a.reliability_source === "eia_derived" && <em className="eia-tag">EIA</em>}
                   </span>
+                  {a.weather_delay_factor > 1 && (
+                    <span className="weather-tag"
+                      title={`live sea state (Open-Meteo Marine): max wave ${a.max_wave_m} m along route — ETA stretched ×${a.weather_delay_factor}`}>
+                      🌊 {a.max_wave_m}m · ETA ×{a.weather_delay_factor}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
