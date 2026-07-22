@@ -18,13 +18,18 @@ export default function TopNav() {
   const brief = useStore((s) => s.brief);
   const setBriefOpen = useStore((s) => s.setBriefOpen);
 
+  const voiceEnabled = useStore((s) => s.voiceEnabled);
+  const toggleVoice = useStore((s) => s.toggleVoice);
+  const corridors = useStore((s) => s.corridors);
+  const inCrisis = Object.values(corridors).some((c) => c.band === "critical");
+
   const stageState = (name: string) => {
     const st = stages.find((s) => s.stage === name);
     return st ? (st.status === "done" ? "done" : "run") : "wait";
   };
 
   return (
-    <header className="topnav">
+    <header className={`topnav ${inCrisis ? "topnav-crisis" : ""}`}>
       <div className="brand">
         <span className="brand-shield">🛡</span>
         <span className="brand-name">PRAHARI</span>
@@ -38,7 +43,18 @@ export default function TopNav() {
         ))}
       </nav>
 
+      {inCrisis && (
+        <span className="crisis-chip" title="a corridor CDP is in the critical band">
+          ⚠ CRISIS MODE
+        </span>
+      )}
+
       <div className="loop-zone">
+        <button className={`btn-voice ${voiceEnabled ? "btn-voice-on" : ""}`}
+          onClick={toggleVoice}
+          title="Supervisor speaks the decision brief aloud (computed values only)">
+          {voiceEnabled ? "🔊 VOICE ON" : "🔇 VOICE"}
+        </button>
         {(loopRunning || stages.length > 0) && (
           <div className="stages">
             {["oracle", "navigator", "custodian", "brief"].map((s) => (

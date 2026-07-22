@@ -75,6 +75,27 @@ def twin() -> dict:
     return KG.geojson()
 
 
+@router.get("/flows")
+def flows() -> dict:
+    """Supply-chain Sankey: supplier -> chokepoint/open-ocean -> coast, in kbd."""
+    links: list[dict] = []
+    for sup in KG.nodes_of("supplier"):
+        share = float(sup["share_pct"]) / 100.0
+        import_kbd = float(KG.seed["national"]["import_volume_kbd"])
+        per_corridor = share * import_kbd / max(1, len(sup["corridors"]))
+        for cid in sup["corridors"]:
+            c = KG.node(cid)
+            links.append({
+                "supplier": sup["name"], "supplier_id": sup["id"],
+                "via": c["chokepoints"][0] if c["chokepoints"] else "open_ocean",
+                "coast": "West Coast" if "West" in c["dest"] else "East Coast",
+                "kbd": round(per_corridor, 0),
+                "corridor_id": cid,
+            })
+    return {"links": links,
+            "total_import_kbd": KG.seed["national"]["import_volume_kbd"]}
+
+
 @router.get("/vessels")
 def vessels() -> dict:
     cutoff = time.time() - 1800

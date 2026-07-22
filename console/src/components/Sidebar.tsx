@@ -15,6 +15,8 @@ export default function Sidebar() {
   const loopRunning = useStore((s) => s.loopRunning);
   const wsConnected = useStore((s) => s.wsConnected);
   const setView = useStore((s) => s.setView);
+  const playReplay = useStore((s) => s.playReplay);
+  const replaying = useStore((s) => s.replaying);
 
   const agentState = (id: string): "processing" | "active" | "standby" => {
     if (id === "supervisor") return loopRunning ? "processing" : "active";
@@ -51,6 +53,15 @@ export default function Sidebar() {
             </button>
           );
         })}
+      </div>
+
+      <div className="side-section">
+        <div className="side-head">REPLAY THEATER</div>
+        <button className="btn-replay" onClick={playReplay} disabled={replaying}
+          title="re-run the recorded real signal window (2026-07-22 Iran/US tensions) through the live console — every signal tagged REPLAY, never presented as live">
+          {replaying ? "⏵ REPLAYING…" : "⏵ REPLAY REAL WINDOW"}
+        </button>
+        <div className="replay-note">Jul 22 Iran–US tensions · 13 real GDELT signals · 40× speed</div>
       </div>
 
       <div className="side-section">

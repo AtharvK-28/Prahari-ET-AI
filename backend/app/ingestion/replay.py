@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 
 from ..config import REPLAY_DIR
-from ..models.schemas import Signal, SignalMode, now_ts
+from ..models.schemas import Signal, SignalMode, new_id as _fresh_id, now_ts
 from .bus import BUS
 
 log = logging.getLogger("prahari.replay")
@@ -43,6 +43,7 @@ async def play(filename: str, speed: float = 10.0) -> int:
             await asyncio.sleep(min(wait, 5.0))
         sig.mode = SignalMode.replay
         sig.ts = now_ts()          # decay math uses arrival time
+        sig.signal_id = _fresh_id()  # re-emission is a new signal instance
         await BUS.publish(sig)
     log.info("replayed %d signals from %s", len(signals), filename)
     return len(signals)

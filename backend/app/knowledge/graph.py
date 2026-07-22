@@ -167,7 +167,8 @@ class KnowledgeGraph:
                 "type": "Feature",
                 "geometry": {"type": "LineString", "coordinates": c["waypoints"]},
                 "properties": {"kind": "corridor", "id": c["id"], "name": c["name"],
-                               "chokepoints": c["chokepoints"], "transit_days": c["transit_days"]},
+                               "chokepoints": c["chokepoints"], "transit_days": c["transit_days"],
+                               "supply_kbd": round(self.corridor_supply_kbd(c["id"]), 0)},
             })
         for cp in self.nodes_of("chokepoint"):
             feats.append({

@@ -308,6 +308,30 @@ h4 { font-size: 10.5px; font-weight: 700; margin: 10px 0 5px; color: var(--text-
 .sb-item { display: inline-flex; gap: 6px; align-items: center; }
 .sb-right { margin-left: auto; }
 
+/* ------------------------------------------------------------ wow features */
+.topnav-crisis { border-bottom-color: #7f1d1d; box-shadow: inset 0 -2px 12px rgba(235, 87, 87, .18); }
+.crisis-chip { font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--critical); border: 1px solid #7f1d1d; padding: 4px 10px; border-radius: 4px; animation: crisis-pulse 1.2s infinite; }
+@keyframes crisis-pulse { 50% { background: rgba(235, 87, 87, .14); box-shadow: 0 0 14px rgba(235, 87, 87, .35); } }
+.btn-voice { border: 1px solid var(--line); color: var(--text-dim); padding: 7px 10px; border-radius: 6px; font-size: 10.5px; font-family: var(--mono); }
+.btn-voice-on { color: var(--accent); border-color: var(--accent-dim); box-shadow: 0 0 10px rgba(34, 211, 238, .2); }
+.btn-replay { width: 100%; border: 1px solid #16324d; color: #7dd3fc; padding: 8px; border-radius: 6px; font-size: 11px; font-family: var(--mono); font-weight: 700; letter-spacing: .04em; }
+.btn-replay:hover { background: #0e2036; }
+.btn-replay:disabled { opacity: .6; }
+.replay-note { font-size: 9.5px; color: var(--text-dim); margin-top: 5px; line-height: 1.5; }
+
+/* sankey */
+.sankey-card { margin-top: 12px; }
+.sankey-svg { width: 100%; height: auto; display: block; }
+.sankey-node { fill: #35547a; }
+.sankey-ribbon { fill: #2286c3; opacity: .32; transition: opacity .15s; cursor: pointer; }
+.sankey-ribbon.sankey-hover { opacity: .75; }
+.sankey-stressed { fill: var(--critical); opacity: .38; }
+.sankey-label { font-size: 9.5px; fill: var(--text); paint-order: stroke; stroke: rgba(8, 17, 32, .85); stroke-width: 3px; }
+.sankey-kbd { fill: var(--text-dim); font-family: var(--mono); font-size: 8.5px; }
+.sankey-col { font-size: 9px; font-weight: 700; letter-spacing: .12em; fill: var(--text-dim); font-family: var(--mono); }
+
+.oracle-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-align: center; font-size: 12.5px; line-height: 1.7; padding: 48px 0; height: auto; }
+
 /* scrollbars */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }

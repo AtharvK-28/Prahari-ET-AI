@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { useStore } from "../store";
 import ImpactView from "../components/ImpactView";
 import ShockCalibration from "../components/ShockCalibration";
+import SupplySankey from "../components/SupplySankey";
 
 export default function OracleView() {
   const scenario = useStore((s) => s.scenario);
@@ -136,6 +137,7 @@ export default function OracleView() {
             the Oracle propagates it through the knowledge graph in ~100 ms
           </div>
         )}
+        <SupplySankey />
       </div>
     </div>
   );

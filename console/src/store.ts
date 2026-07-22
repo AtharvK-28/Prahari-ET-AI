@@ -34,6 +34,8 @@ interface PrahariState {
   wsConnected: boolean;
   calibration: ShockCalibration | null;
   weather: Record<string, CorridorWeather>;
+  voiceEnabled: boolean;
+  replaying: boolean;
 
   boot: () => Promise<void>;
   select: (id: string | null) => void;
@@ -45,6 +47,19 @@ interface PrahariState {
   fireTrigger: () => Promise<void>;
   decide: (approve: boolean) => Promise<void>;
   setBriefOpen: (open: boolean) => void;
+  toggleVoice: () => void;
+  playReplay: () => Promise<void>;
+}
+
+/** speak a short computed summary — Web Speech API, no deps, no invented numbers */
+export function speak(text: string) {
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.04;
+    u.pitch = 0.95;
+    window.speechSynthesis.speak(u);
+  } catch { /* unsupported browser — silent */ }
 }
 
 export const useStore = create<PrahariState>((set, get) => ({
@@ -68,6 +83,8 @@ export const useStore = create<PrahariState>((set, get) => ({
   wsConnected: false,
   calibration: null,
   weather: {},
+  voiceEnabled: false,
+  replaying: false,
 
   boot: async () => {
     const [status, twin, corridorsRes, recent] = await Promise.all([
@@ -125,6 +142,31 @@ export const useStore = create<PrahariState>((set, get) => ({
   },
 
   setBriefOpen: (briefOpen) => set({ briefOpen }),
+
+  toggleVoice: () => {
+    const on = !get().voiceEnabled;
+    set({ voiceEnabled: on });
+    if (on) speak("PRAHARI voice briefing enabled.");
+    else window.speechSynthesis?.cancel();
+  },
+
+  playReplay: async () => {
+    if (get().replaying) return;
+    set({ replaying: true });
+    try {
+      const { windows } = await (await fetch(
+        (import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000") + "/replay/windows")).json();
+      // prefer the curated real window, else the newest recording
+      const file = windows.find((w: string) => w.startsWith("real_window")) ?? windows.at(-1);
+      if (!file) return;
+      await fetch((import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000") + "/replay/play", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ file, speed: 40 }),
+      });
+    } finally {
+      set({ replaying: false });
+    }
+  },
 }));
 
 function connectWS(set: any, get: any) {
@@ -161,9 +203,23 @@ function connectWS(set: any, get: any) {
         set(patch);
         break;
       }
-      case "brief_ready":
+      case "brief_ready": {
         set({ brief: msg.brief, briefOpen: true, loopRunning: false });
+        if (get().voiceEnabled) {
+          const b = msg.brief;
+          const s = b.scenario;
+          const best = b.procurement?.ranked?.find((a: any) => a.allocated_kbd > 0);
+          speak(
+            `PRAHARI alert. Corridor disruption probability ${(b.trigger.cdp * 100).toFixed(0)} percent, ` +
+            `${b.trigger.band}, on ${b.trigger.corridor_name}. ` +
+            `${s.imports_at_risk_pct} percent of imports at risk. ` +
+            `Days of cover falls to ${s.days_of_cover.toFixed(1)}. ` +
+            (best ? `Recommended reroute: ${best.allocated_kbd} thousand barrels per day of ${best.grade} from ${best.supplier}. ` : "") +
+            `Decision brief ready. Awaiting authorization.`
+          );
+        }
         break;
+      }
     }
   };
 }
