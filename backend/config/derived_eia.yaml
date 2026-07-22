@@ -1,0 +1,172 @@
+meta:
+  source: EIA bulk PET_IMPORTS (monthly, country -> Total U.S.)
+  generated: 2026-07-22 14:47
+  window_months: 60
+  caveat: US-bound flow volatility used as a GLOBAL supply-reliability proxy per supplier
+    — not India bilateral flows. to-verify.
+  formula: reliability_proxy = 0.25 + 0.45*stability + 0.30*activity; stability =
+    1 - min(cv,1.5)/1.5 over active months
+world_to_us:
+  months_analysed: 24
+  active_months: 24
+  activity: 1.0
+  mean_flow_kbd: 6373.1
+  flow_cv: 0.063
+  stability: 0.96
+  reliability_proxy: 0.98
+  window_end: '202604'
+suppliers:
+  adnoc:
+    eia_country: United Arab Emirates
+    series_id: PET_IMPORTS.CTY_AE-US-ALL.M
+    months_analysed: 60
+    active_months: 31
+    activity: 0.52
+    mean_flow_kbd: 43.5
+    flow_cv: 0.463
+    stability: 0.69
+    reliability_proxy: 0.72
+    window_end: '202604'
+  angola_son:
+    eia_country: Angola
+    series_id: PET_IMPORTS.CTY_AO-US-ALL.M
+    months_analysed: 60
+    active_months: 59
+    activity: 0.98
+    mean_flow_kbd: 37.9
+    flow_cv: 0.636
+    stability: 0.58
+    reliability_proxy: 0.8
+    window_end: '202604'
+  colombia_eco:
+    eia_country: Colombia
+    series_id: PET_IMPORTS.CTY_CO-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 204.1
+    flow_cv: 0.179
+    stability: 0.88
+    reliability_proxy: 0.95
+    window_end: '202604'
+  guyana_exxon:
+    eia_country: Guyana
+    series_id: PET_IMPORTS.CTY_GY-US-ALL.M
+    months_analysed: 60
+    active_months: 59
+    activity: 0.98
+    mean_flow_kbd: 142.4
+    flow_cv: 0.551
+    stability: 0.63
+    reliability_proxy: 0.83
+    window_end: '202604'
+  iraq_somo:
+    eia_country: Iraq
+    series_id: PET_IMPORTS.CTY_IZ-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 202.3
+    flow_cv: 0.269
+    stability: 0.82
+    reliability_proxy: 0.92
+    window_end: '202604'
+  kazakh:
+    eia_country: Kazakhstan
+    series_id: PET_IMPORTS.CTY_KZ-US-ALL.M
+    months_analysed: 60
+    active_months: 48
+    activity: 0.8
+    mean_flow_kbd: 34.6
+    flow_cv: 0.535
+    stability: 0.64
+    reliability_proxy: 0.78
+    window_end: '202604'
+  kpc:
+    eia_country: Kuwait
+    series_id: PET_IMPORTS.CTY_KU-US-ALL.M
+    months_analysed: 60
+    active_months: 52
+    activity: 0.87
+    mean_flow_kbd: 23.7
+    flow_cv: 0.488
+    stability: 0.67
+    reliability_proxy: 0.81
+    window_end: '202604'
+  mexico_pemex:
+    eia_country: Mexico
+    series_id: PET_IMPORTS.CTY_MX-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 542.8
+    flow_cv: 0.283
+    stability: 0.81
+    reliability_proxy: 0.92
+    window_end: '202604'
+  nigeria_nnpc:
+    eia_country: Nigeria
+    series_id: PET_IMPORTS.CTY_NI-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 128.5
+    flow_cv: 0.386
+    stability: 0.74
+    reliability_proxy: 0.88
+    window_end: '202604'
+  omoc:
+    eia_country: Oman
+    series_id: PET_IMPORTS.CTY_MU-US-ALL.M
+    months_analysed: 60
+    active_months: 0
+    activity: 0.0
+    mean_flow_kbd: 0.0
+    flow_cv: 1.5
+    stability: 0.0
+    reliability_proxy: null
+    window_end: '202604'
+  petrobras:
+    eia_country: Brazil
+    series_id: PET_IMPORTS.CTY_BR-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 176.7
+    flow_cv: 0.358
+    stability: 0.76
+    reliability_proxy: 0.89
+    window_end: '202604'
+  qatar_en:
+    eia_country: Qatar
+    series_id: PET_IMPORTS.CTY_QA-US-ALL.M
+    months_analysed: 60
+    active_months: 3
+    activity: 0.05
+    mean_flow_kbd: 16.6
+    flow_cv: 0.028
+    stability: 0.98
+    reliability_proxy: null
+    window_end: '202604'
+  russia:
+    eia_country: Russia
+    series_id: PET_IMPORTS.CTY_RS-US-ALL.M
+    months_analysed: 60
+    active_months: 13
+    activity: 0.22
+    mean_flow_kbd: 161.3
+    flow_cv: 0.678
+    stability: 0.55
+    reliability_proxy: 0.56
+    window_end: '202604'
+  saudi_aramco:
+    eia_country: Saudi Arabia
+    series_id: PET_IMPORTS.CTY_SA-US-ALL.M
+    months_analysed: 60
+    active_months: 60
+    activity: 1.0
+    mean_flow_kbd: 351.8
+    flow_cv: 0.275
+    stability: 0.82
+    reliability_proxy: 0.92
+    window_end: '202604'

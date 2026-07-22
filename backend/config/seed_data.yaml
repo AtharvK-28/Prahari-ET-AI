@@ -1,0 +1,349 @@
+# ============================================================================
+# PRAHARI seed knowledge graph — India crude supply chain (Hackathon MVP)
+# DATA HONESTY RULE (NFR3): every figure below is curated from public sources
+# (PPAC, EIA, ISPRL, press) and is marked TO-VERIFY before the pitch.
+# This is the single source of truth for the KG + geospatial twin.
+# ============================================================================
+
+meta:
+  version: "0.1"
+  status: to-verify
+  sources: [PPAC, EIA, ISPRL, MoPNG, public press]
+
+# ---------------------------------------------------------------------------
+# National context (Oracle parameters)
+# ---------------------------------------------------------------------------
+national:
+  crude_consumption_kbd: 5450        # ~5.45 Mbpd  (to-verify vs PPAC)
+  import_dependency_pct: 88
+  import_volume_kbd: 4800            # ~4.8 Mbpd imported
+  hormuz_transit_share_pct: 42       # 40-45% per problem brief
+  commercial_stock_days: 12          # refiner working inventory (to-verify)
+  gdp_usd_bn: 4300                   # FY26 nominal (to-verify)
+  baseline_brent_usd: 78.0           # static fallback when no live feed
+  india_basket_offset_usd: -1.2      # basket vs Brent at baseline
+  supply_elasticity: 0.08            # % Brent move per % global supply lost (editable)
+  global_supply_kbd: 103000          # world liquid-fuels supply (to-verify)
+  fx_inr_usd: 86.0
+  power_diesel_share: 0.18           # share of backup/agri power exposed to diesel
+
+# ---------------------------------------------------------------------------
+# Crude grades
+# ---------------------------------------------------------------------------
+crude_grades:
+  - {id: basrah_medium,  name: Basrah Medium,   api: 27.9, sulfur: 3.0, category: heavy_sour}
+  - {id: basrah_heavy,   name: Basrah Heavy,    api: 23.7, sulfur: 4.1, category: heavy_sour}
+  - {id: arab_light,     name: Arab Light,      api: 33.0, sulfur: 1.8, category: medium_sour}
+  - {id: arab_heavy,     name: Arab Heavy,      api: 27.5, sulfur: 2.9, category: heavy_sour}
+  - {id: murban,         name: Murban,          api: 40.2, sulfur: 0.7, category: light_sweet}
+  - {id: upper_zakum,    name: Upper Zakum,     api: 33.9, sulfur: 1.8, category: medium_sour}
+  - {id: kuwait_export,  name: Kuwait Export,   api: 30.5, sulfur: 2.6, category: medium_sour}
+  - {id: urals,          name: Urals,           api: 31.7, sulfur: 1.7, category: medium_sour}
+  - {id: espo,           name: ESPO Blend,      api: 34.8, sulfur: 0.6, category: light_sweet}
+  - {id: wti_midland,    name: WTI Midland,     api: 42.0, sulfur: 0.2, category: light_sweet}
+  - {id: mars,           name: Mars (US Gulf),  api: 29.5, sulfur: 1.9, category: medium_sour}
+  - {id: bonny_light,    name: Bonny Light,     api: 35.0, sulfur: 0.15, category: light_sweet}
+  - {id: agbami,         name: Agbami,          api: 47.5, sulfur: 0.04, category: light_sweet}
+  - {id: girassol,       name: Girassol,        api: 31.0, sulfur: 0.3, category: medium_sweet}
+  - {id: tupi,           name: Tupi,            api: 28.5, sulfur: 0.35, category: medium_sweet}
+  - {id: liza,           name: Liza,            api: 32.0, sulfur: 0.5, category: medium_sweet}
+  - {id: oman_export,    name: Oman Export,     api: 30.5, sulfur: 1.4, category: medium_sour}
+  - {id: qatar_marine,   name: Qatar Marine,    api: 32.0, sulfur: 1.6, category: medium_sour}
+
+# ---------------------------------------------------------------------------
+# Chokepoints (geospatial twin anchors)
+# ---------------------------------------------------------------------------
+chokepoints:
+  - id: hormuz
+    name: Strait of Hormuz
+    lat: 26.57
+    lon: 56.25
+    india_import_share_pct: 42        # share of India's crude imports transiting
+    monitor_bbox: [[24.5, 54.0], [27.5, 58.5]]   # [[latS,lonW],[latN,lonE]] AIS box
+  - id: bab_el_mandeb
+    name: Bab el-Mandeb
+    lat: 12.58
+    lon: 43.33
+    india_import_share_pct: 12        # Urals via Suez + some WAF via Red Sea (to-verify)
+    monitor_bbox: [[11.0, 42.0], [14.0, 44.5]]
+  - id: suez
+    name: Suez Canal / SUMED
+    lat: 30.45
+    lon: 32.35
+    india_import_share_pct: 10
+    monitor_bbox: [[29.5, 32.0], [31.5, 33.0]]
+  - id: malacca
+    name: Strait of Malacca
+    lat: 2.50
+    lon: 101.0
+    india_import_share_pct: 4         # ESPO share (to-verify)
+    monitor_bbox: [[1.0, 99.5], [4.0, 103.5]]
+
+# ---------------------------------------------------------------------------
+# Corridors — supplier region -> Indian coast, with routing + geometry
+# waypoints are [lon, lat] for the map twin PathLayer
+# ---------------------------------------------------------------------------
+corridors:
+  - id: pg_west_india
+    name: "Persian Gulf → West Coast India"
+    origin: Persian Gulf
+    dest: West Coast India
+    chokepoints: [hormuz]
+    distance_nm: 1450
+    transit_days: 4
+    baseline_risk: 0.22
+    ports: [sikka, vadinar_port, new_mangalore]
+    waypoints: [[50.1, 28.9], [54.5, 26.6], [56.5, 26.4], [58.5, 25.2], [64.0, 23.5], [69.7, 22.4]]
+  - id: pg_east_india
+    name: "Persian Gulf → East Coast India"
+    origin: Persian Gulf
+    dest: East Coast India
+    chokepoints: [hormuz]
+    distance_nm: 2600
+    transit_days: 7
+    baseline_risk: 0.22
+    ports: [paradip_port, visakh_port]
+    waypoints: [[50.1, 28.9], [56.5, 26.4], [61.0, 23.0], [73.0, 12.0], [80.3, 6.0], [83.3, 17.6]]
+  - id: redsea_west_india
+    name: "Black Sea/Med (Urals) → Suez → West India"
+    origin: Novorossiysk / Med
+    dest: West Coast India
+    chokepoints: [suez, bab_el_mandeb]
+    distance_nm: 4600
+    transit_days: 14
+    baseline_risk: 0.30
+    ports: [sikka, vadinar_port]
+    waypoints: [[37.8, 44.7], [32.35, 30.45], [33.9, 27.0], [43.3, 12.6], [50.0, 12.0], [60.0, 15.0], [69.7, 22.4]]
+  - id: cape_west_india_urals
+    name: "Urals via Cape of Good Hope → West India"
+    origin: Baltic / Novorossiysk
+    dest: West Coast India
+    chokepoints: []
+    distance_nm: 10800
+    transit_days: 31
+    baseline_risk: 0.10
+    ports: [sikka, vadinar_port]
+    waypoints: [[5.0, 35.5], [-9.5, 33.0], [-14.0, 12.0], [10.0, -32.0], [25.0, -35.5], [45.0, -22.0], [60.0, 0.0], [69.7, 22.4]]
+  - id: espo_east_india
+    name: "Kozmino (ESPO) → Malacca → East India"
+    origin: Kozmino
+    dest: East Coast India
+    chokepoints: [malacca]
+    distance_nm: 5300
+    transit_days: 16
+    baseline_risk: 0.12
+    ports: [paradip_port, visakh_port]
+    waypoints: [[132.9, 42.7], [122.0, 25.0], [104.0, 3.0], [101.0, 2.5], [95.0, 6.0], [83.3, 17.6]]
+  - id: wafr_west_india
+    name: "West Africa → West India (open ocean)"
+    origin: Gulf of Guinea
+    dest: West Coast India
+    chokepoints: []
+    distance_nm: 6800
+    transit_days: 20
+    baseline_risk: 0.08
+    ports: [sikka, new_mangalore, kochi_port]
+    waypoints: [[6.8, 3.9], [10.5, -8.0], [20.0, -34.8], [40.0, -25.0], [58.0, -5.0], [69.7, 22.4]]
+  - id: usgc_cape_india
+    name: "US Gulf → Cape → West India"
+    origin: US Gulf Coast
+    dest: West Coast India
+    chokepoints: []
+    distance_nm: 11500
+    transit_days: 34
+    baseline_risk: 0.08
+    ports: [sikka, vadinar_port]
+    waypoints: [[-94.8, 29.3], [-80.0, 24.0], [-30.0, 5.0], [10.0, -33.0], [25.0, -35.5], [50.0, -10.0], [69.7, 22.4]]
+  - id: usgc_suez_india
+    name: "US Gulf → Suez → West India"
+    origin: US Gulf Coast
+    dest: West Coast India
+    chokepoints: [suez, bab_el_mandeb]
+    distance_nm: 9700
+    transit_days: 29
+    baseline_risk: 0.28
+    ports: [sikka, vadinar_port]
+    waypoints: [[-94.8, 29.3], [-5.6, 35.9], [32.35, 30.45], [43.3, 12.6], [60.0, 14.0], [69.7, 22.4]]
+  - id: brazil_west_india
+    name: "Brazil → Cape → West India"
+    origin: Santos Basin
+    dest: West Coast India
+    chokepoints: []
+    distance_nm: 8900
+    transit_days: 26
+    baseline_risk: 0.07
+    ports: [sikka, new_mangalore]
+    waypoints: [[-43.0, -23.5], [-20.0, -30.0], [20.0, -35.5], [45.0, -20.0], [65.0, 5.0], [69.7, 22.4]]
+  - id: guyana_west_india
+    name: "Guyana → Cape → West India"
+    origin: Stabroek
+    dest: West Coast India
+    chokepoints: []
+    distance_nm: 9600
+    transit_days: 28
+    baseline_risk: 0.07
+    ports: [sikka, vadinar_port]
+    waypoints: [[-57.0, 7.5], [-40.0, -5.0], [10.0, -33.0], [25.0, -35.5], [55.0, -8.0], [69.7, 22.4]]
+
+# ---------------------------------------------------------------------------
+# Suppliers — share_pct = share of India's crude imports (to-verify vs PPAC)
+# ---------------------------------------------------------------------------
+suppliers:
+  - {id: russia,      name: "Russia (Urals/ESPO)", country: Russia,  share_pct: 36, grades: [urals, espo],                corridors: [redsea_west_india, cape_west_india_urals, espo_east_india], reliability: 0.80, sanction_exposure: high}
+  - {id: iraq_somo,   name: "SOMO (Iraq)",         country: Iraq,    share_pct: 18, grades: [basrah_medium, basrah_heavy], corridors: [pg_west_india, pg_east_india], reliability: 0.85, sanction_exposure: low}
+  - {id: saudi_aramco, name: "Saudi Aramco",       country: Saudi Arabia, share_pct: 11, grades: [arab_light, arab_heavy], corridors: [pg_west_india, pg_east_india], reliability: 0.95, sanction_exposure: low}
+  - {id: adnoc,       name: "ADNOC (UAE)",         country: UAE,     share_pct: 9,  grades: [murban, upper_zakum],        corridors: [pg_west_india], reliability: 0.95, sanction_exposure: low}
+  - {id: us_exports,  name: "US Exporters",        country: USA,     share_pct: 5,  grades: [wti_midland, mars],          corridors: [usgc_cape_india, usgc_suez_india], reliability: 0.92, sanction_exposure: none}
+  - {id: kpc,         name: "KPC (Kuwait)",        country: Kuwait,  share_pct: 4,  grades: [kuwait_export],              corridors: [pg_west_india], reliability: 0.92, sanction_exposure: low}
+  - {id: nigeria_nnpc, name: "NNPC (Nigeria)",     country: Nigeria, share_pct: 3,  grades: [bonny_light, agbami],        corridors: [wafr_west_india], reliability: 0.75, sanction_exposure: none}
+  - {id: angola_son,  name: "Sonangol (Angola)",   country: Angola,  share_pct: 2,  grades: [girassol],                   corridors: [wafr_west_india], reliability: 0.82, sanction_exposure: none}
+  - {id: petrobras,   name: "Petrobras (Brazil)",  country: Brazil,  share_pct: 2,  grades: [tupi],                       corridors: [brazil_west_india], reliability: 0.90, sanction_exposure: none}
+  - {id: guyana_exxon, name: "Stabroek (Guyana)",  country: Guyana,  share_pct: 1,  grades: [liza],                       corridors: [guyana_west_india], reliability: 0.88, sanction_exposure: none}
+  - {id: omoc,        name: "OQ (Oman)",           country: Oman,    share_pct: 2,  grades: [oman_export],                corridors: [pg_west_india], reliability: 0.90, sanction_exposure: none}
+  - {id: qatar_en,    name: "QatarEnergy",         country: Qatar,   share_pct: 1,  grades: [qatar_marine],               corridors: [pg_west_india], reliability: 0.93, sanction_exposure: low}
+  - {id: kazakh,      name: "KMG (Kazakh CPC)",    country: Kazakhstan, share_pct: 1, grades: [urals],                    corridors: [redsea_west_india], reliability: 0.80, sanction_exposure: medium}
+  - {id: colombia_eco, name: "Ecopetrol (Colombia)", country: Colombia, share_pct: 1, grades: [mars],                     corridors: [usgc_cape_india], reliability: 0.85, sanction_exposure: none}
+  - {id: mexico_pemex, name: "PEMEX (Mexico)",     country: Mexico,  share_pct: 1,  grades: [mars],                       corridors: [usgc_cape_india], reliability: 0.83, sanction_exposure: none}
+
+# ---------------------------------------------------------------------------
+# Ports
+# ---------------------------------------------------------------------------
+ports:
+  - {id: sikka,          name: "Sikka / Jamnagar SPM", lat: 22.43, lon: 69.83, capacity_kbd: 1600, congestion: 0.25}
+  - {id: vadinar_port,   name: "Vadinar Terminal",     lat: 22.47, lon: 69.70, capacity_kbd: 600,  congestion: 0.20}
+  - {id: new_mangalore,  name: "New Mangalore",        lat: 12.93, lon: 74.81, capacity_kbd: 400,  congestion: 0.30}
+  - {id: kochi_port,     name: "Kochi (SPM)",          lat: 9.97,  lon: 76.24, capacity_kbd: 350,  congestion: 0.25}
+  - {id: paradip_port,   name: "Paradip",              lat: 20.26, lon: 86.67, capacity_kbd: 450,  congestion: 0.35}
+  - {id: visakh_port,    name: "Visakhapatnam",        lat: 17.69, lon: 83.29, capacity_kbd: 400,  congestion: 0.30}
+
+# ---------------------------------------------------------------------------
+# Refineries — capacity kbd, grade tolerance = yield penalty (0 = perfect fit,
+# 1 = cannot process). Keyed by grade category for MVP simplicity.
+# ---------------------------------------------------------------------------
+refineries:
+  - id: jamnagar
+    name: "Jamnagar (RIL)"
+    lat: 22.35
+    lon: 69.87
+    capacity_kbd: 1240
+    nelson: 14.0
+    port: sikka
+    hormuz_fed_share: 0.55           # share of intake transiting Hormuz (to-verify)
+    process_penalty: {heavy_sour: 0.00, medium_sour: 0.00, medium_sweet: 0.01, light_sweet: 0.02}
+  - id: vadinar
+    name: "Vadinar (Nayara)"
+    lat: 22.37
+    lon: 69.75
+    capacity_kbd: 405
+    nelson: 11.8
+    port: vadinar_port
+    hormuz_fed_share: 0.35           # mostly Urals now (to-verify)
+    process_penalty: {heavy_sour: 0.02, medium_sour: 0.00, medium_sweet: 0.01, light_sweet: 0.03}
+  - id: mangalore
+    name: "Mangalore (MRPL)"
+    lat: 12.90
+    lon: 74.90
+    capacity_kbd: 300
+    nelson: 9.5
+    port: new_mangalore
+    hormuz_fed_share: 0.60
+    process_penalty: {heavy_sour: 0.05, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.03}
+  - id: kochi
+    name: "Kochi (BPCL)"
+    lat: 9.96
+    lon: 76.30
+    capacity_kbd: 310
+    nelson: 10.5
+    port: kochi_port
+    hormuz_fed_share: 0.55
+    process_penalty: {heavy_sour: 0.03, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.03}
+  - id: paradip
+    name: "Paradip (IOCL)"
+    lat: 20.28
+    lon: 86.61
+    capacity_kbd: 300
+    nelson: 12.2
+    port: paradip_port
+    hormuz_fed_share: 0.40
+    process_penalty: {heavy_sour: 0.01, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.03}
+  - id: visakh
+    name: "Visakh (HPCL)"
+    lat: 17.72
+    lon: 83.30
+    capacity_kbd: 300
+    nelson: 11.0
+    port: visakh_port
+    hormuz_fed_share: 0.45
+    process_penalty: {heavy_sour: 0.03, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.04}
+  - id: koyali
+    name: "Koyali (IOCL)"
+    lat: 22.37
+    lon: 73.12
+    capacity_kbd: 275
+    nelson: 9.8
+    port: sikka
+    hormuz_fed_share: 0.50
+    process_penalty: {heavy_sour: 0.06, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.02}
+  - id: panipat
+    name: "Panipat (IOCL)"
+    lat: 29.44
+    lon: 76.80
+    capacity_kbd: 300
+    nelson: 11.9
+    port: vadinar_port
+    hormuz_fed_share: 0.50
+    process_penalty: {heavy_sour: 0.02, medium_sour: 0.00, medium_sweet: 0.02, light_sweet: 0.03}
+
+# ---------------------------------------------------------------------------
+# SPR sites (ISPRL Phase I) — 5.33 MMT total ≈ 39 Mbbl ≈ 9.5 days cover
+# ---------------------------------------------------------------------------
+spr_sites:
+  - {id: visakhapatnam_spr, name: "Visakhapatnam SPR", lat: 17.68, lon: 83.28, capacity_mmt: 1.33, fill_pct: 92}
+  - {id: mangalore_spr,     name: "Mangalore SPR",     lat: 12.92, lon: 74.88, capacity_mmt: 1.50, fill_pct: 70}
+  - {id: padur_spr,         name: "Padur SPR",         lat: 13.13, lon: 74.77, capacity_mmt: 2.50, fill_pct: 62}
+
+spr:
+  mmt_to_mbbl: 7.33                  # tonnes->bbl for India-basket avg density
+  max_daily_release_kbd: 550         # combined pipeline/SPM evacuation limit (to-verify)
+  reserve_floor_pct: 30              # Custodian must keep >= 30% of total capacity
+
+# ---------------------------------------------------------------------------
+# Navigator: curated alternative-source table (supplier x grade x corridor).
+# landed_premium_usd = $/bbl over India-basket baseline incl. freight (to-verify)
+# tanker_availability_kbd = incremental volume charterable in the window
+# ---------------------------------------------------------------------------
+alternatives:
+  - {id: alt_wafr_bonny,   supplier: nigeria_nnpc, grade: bonny_light, corridor: wafr_west_india,  landed_premium_usd: 3.6, eta_days: 20, tanker_availability_kbd: 500}
+  - {id: alt_wafr_agbami,  supplier: nigeria_nnpc, grade: agbami,      corridor: wafr_west_india,  landed_premium_usd: 3.9, eta_days: 20, tanker_availability_kbd: 250}
+  - {id: alt_angola,       supplier: angola_son,   grade: girassol,    corridor: wafr_west_india,  landed_premium_usd: 3.2, eta_days: 21, tanker_availability_kbd: 350}
+  - {id: alt_us_cape,      supplier: us_exports,   grade: wti_midland, corridor: usgc_cape_india,  landed_premium_usd: 4.8, eta_days: 34, tanker_availability_kbd: 700}
+  - {id: alt_us_suez,      supplier: us_exports,   grade: wti_midland, corridor: usgc_suez_india,  landed_premium_usd: 4.1, eta_days: 29, tanker_availability_kbd: 400}
+  - {id: alt_us_mars,      supplier: us_exports,   grade: mars,        corridor: usgc_cape_india,  landed_premium_usd: 4.2, eta_days: 34, tanker_availability_kbd: 300}
+  - {id: alt_brazil,       supplier: petrobras,    grade: tupi,        corridor: brazil_west_india, landed_premium_usd: 3.4, eta_days: 26, tanker_availability_kbd: 400}
+  - {id: alt_guyana,       supplier: guyana_exxon, grade: liza,        corridor: guyana_west_india, landed_premium_usd: 3.7, eta_days: 28, tanker_availability_kbd: 350}
+  - {id: alt_urals_cape,   supplier: russia,       grade: urals,       corridor: cape_west_india_urals, landed_premium_usd: 1.8, eta_days: 31, tanker_availability_kbd: 600}
+  - {id: alt_espo,         supplier: russia,       grade: espo,        corridor: espo_east_india,  landed_premium_usd: 2.6, eta_days: 16, tanker_availability_kbd: 300}
+  - {id: alt_oman,         supplier: omoc,         grade: oman_export, corridor: pg_west_india,    landed_premium_usd: 2.2, eta_days: 5,  tanker_availability_kbd: 200}
+  - {id: alt_colombia,     supplier: colombia_eco, grade: mars,        corridor: usgc_cape_india,  landed_premium_usd: 3.8, eta_days: 33, tanker_availability_kbd: 150}
+
+# ---------------------------------------------------------------------------
+# Canonical scenarios (PRD open question #2 — working set)
+# ---------------------------------------------------------------------------
+scenarios:
+  hormuz_50:
+    name: "Hormuz partial closure (50% / 30d)"
+    kind: chokepoint_cut
+    chokepoint: hormuz
+    cut_pct: 50
+    duration_days: 30
+  redsea_suspension:
+    name: "Red Sea transit suspension (80% / 45d)"
+    kind: chokepoint_cut
+    chokepoint: bab_el_mandeb
+    cut_pct: 80
+    duration_days: 45
+  opec_cut:
+    name: "OPEC+ emergency cut (1.5 Mbpd / 60d)"
+    kind: supply_cut
+    volume_kbd: 1500
+    duration_days: 60

@@ -1,0 +1,55 @@
+# PRAHARI — model configuration: CDP fusion weights, thresholds, agent params.
+# All hand-set + transparent (TRD §5.1). Tunable without code changes.
+
+cdp:
+  weights:                 # sum need not be 1; sigmoid normalises
+    geo: 0.35              # w_g — GDELT geopolitical intensity
+    ais: 0.30              # w_a — AIS anomaly score
+    sanctions: 0.10        # w_s — OFAC SDN additions
+    market: 0.25           # w_m — Brent spike / volatility
+  bias: -1.9               # sigmoid bias -> quiet baseline CDP ~= corridor baseline_risk
+  llm_nudge_cap: 0.10      # |δ_llm| bound on the context adjudicator
+  alert_threshold: 0.65    # Supervisor auto-trigger level
+  decay_halflife_min: 180  # signal influence half-life
+  scale: 6.0               # logit scale applied to weighted component sum
+
+ais_anomaly:
+  loiter_speed_kn: 2.0     # below this near a chokepoint = loitering
+  gap_minutes: 45          # AIS silence in a monitored box = "dark"
+  reversal_deg: 120        # heading change > this = reversal
+  baseline_window_min: 60
+
+lead_time:
+  # heuristic: physical signal leads market reaction by this window per source mix
+  ais_lead_hours: [24, 72]
+  news_lead_hours: [6, 24]
+
+oracle:
+  monte_carlo_samples: 500
+  uncertain_params:        # sampled ± ranges for the uncertainty band
+    supply_elasticity: [0.05, 0.12]
+    commercial_stock_days: [10, 14]
+    substitutability: [0.5, 0.8]     # share of lost grade replaceable by others
+  spot_scramble_premium_usd_per_10pct_gap: 1.6   # basket premium widening
+
+navigator:
+  risk_aversion_lambda: 0.15   # $ per (risk x day) — user-tunable
+  risk_ceiling: 0.70           # exclude corridors with CDP above this
+  yield_penalty_tolerance: 0.05
+  max_single_source_share: 0.5 # diversification: one source covers <= 50% of gap
+  reliability_weight_usd: 2.0  # $/bbl penalty per unit of supplier unreliability
+                               # (reliability = EIA-derived flow stability where available)
+
+custodian:
+  price_replenish_threshold_usd: 75.0   # refill window when Brent forecast below
+
+demo:
+  # The "Trigger demo signal" control injects this labelled synthetic burst.
+  # It is ALWAYS tagged mode=demo — never presented as live data (NFR3).
+  corridor: pg_west_india
+  chokepoint: hormuz
+  signals:
+    - {type: conflict_event, magnitude: 0.85, confidence: 0.9, summary: "DEMO: naval incident reported near Strait of Hormuz"}
+    - {type: ais_anomaly,    magnitude: 0.80, confidence: 0.85, summary: "DEMO: 3 laden VLCCs reverse course south of Hormuz"}
+    - {type: ais_anomaly,    magnitude: 0.70, confidence: 0.80, summary: "DEMO: AIS dark gap cluster in Hormuz monitoring box"}
+    - {type: price_move,     magnitude: 0.75, confidence: 0.95, summary: "DEMO: Brent +6.2% intraday spike"}
