@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRAHARI - Action Center</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#ffba20",
+                    "tertiary-fixed-dim": "#ebb2ff",
+                    "on-secondary": "#412d00",
+                    "on-background": "#d4e4fa",
+                    "on-primary-container": "#00566a",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#001f28",
+                    "on-secondary-container": "#6b4b00",
+                    "secondary-container": "#feb700",
+                    "on-secondary-fixed": "#271900",
+                    "secondary": "#ffdb9d",
+                    "surface-container": "#122131",
+                    "on-surface-variant": "#bbc9cf",
+                    "tertiary-container": "#e8a9ff",
+                    "primary": "#a4e6ff",
+                    "on-tertiary-fixed-variant": "#692984",
+                    "secondary-fixed": "#ffdea8",
+                    "on-primary-fixed-variant": "#004e60",
+                    "primary-container": "#00d1ff",
+                    "surface-container-lowest": "#010f1f",
+                    "outline": "#859399",
+                    "on-primary": "#003543",
+                    "on-surface": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "error-container": "#93000a",
+                    "inverse-primary": "#00677f",
+                    "on-error": "#690005",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "on-secondary-fixed-variant": "#5e4200",
+                    "surface-tint": "#4cd6ff",
+                    "tertiary": "#f5cfff",
+                    "inverse-surface": "#d4e4fa",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c",
+                    "outline-variant": "#3c494e",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "on-tertiary-fixed": "#320047",
+                    "on-tertiary": "#500a6c",
+                    "tertiary-fixed": "#f8d8ff",
+                    "surface-dim": "#051424",
+                    "surface": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary-container": "#71318c",
+                    "inverse-on-surface": "#233143",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#b7eaff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "header-height": "48px",
+                    "sm": "8px",
+                    "lg": "16px",
+                    "unit": "4px",
+                    "rail-width": "400px",
+                    "md": "12px",
+                    "xl": "24px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "brand-title": ["Inter"],
+                    "body-default": ["Inter"],
+                    "label-xs": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "code-log": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "brand-title": ["15px", {"lineHeight": "20px", "letterSpacing": "0.12em", "fontWeight": "700"}],
+                    "body-default": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "label-xs": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+                    "headline-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "data-mono": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "code-log": ["11px", {"lineHeight": "16px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Custom scrollbar for terminal/data sections */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3c494e;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00d1ff;
+        }
+        
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+        
+        .glow-effect:hover {
+            box-shadow: 0 0 12px rgba(0, 209, 255, 0.4);
+            border-color: #00d1ff;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-default min-h-screen overflow-hidden selection:bg-primary-container/30">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lg h-header-height bg-surface-container dark:bg-surface-container border-b border-outline-variant bg-surface-container/80 backdrop-blur-md">
+<!-- Brand -->
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-brand-title text-brand-title text-primary dark:text-primary tracking-widest">PRAHARI</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex gap-lg h-full">
+<a class="h-full flex items-center px-sm text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Strategic Overview</a>
+<a class="h-full flex items-center px-sm text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Intelligence Hub</a>
+<a class="h-full flex items-center px-sm text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Simulation</a>
+<a class="h-full flex items-center px-sm text-primary border-b-2 border-primary font-headline-md opacity-80 scale-95 transition-colors duration-200" href="#">Action Center</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-md">
+<!-- Search Bar Position (Logic placeholder) -->
+<button class="hidden lg:flex items-center gap-xs px-md py-xs bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-DEFAULT hover:brightness-110 transition-all">
+                Trigger Demo
+            </button>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="hover:text-primary-fixed-dim transition-colors duration-200"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-primary-fixed-dim transition-colors duration-200"><span class="material-symbols-outlined">settings</span></button>
+<button class="hover:text-primary-fixed-dim transition-colors duration-200"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-header-height)] w-rail-width z-40 flex flex-col bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant bg-surface-container-low/90 backdrop-blur-xl transition-all">
+<!-- Header -->
+<div class="p-lg border-b border-outline-variant flex flex-col gap-sm">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md text-primary">COMMAND_NODE_01</span>
+<span class="font-label-xs text-label-xs text-secondary-fixed-dim">Operational Status: ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 flex flex-col py-md overflow-y-auto">
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[18px]">dashboard</span>
+                Overview
+            </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[18px]">radar</span>
+                Sentinel
+            </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+                Oracle
+            </a>
+<!-- Active Tab -->
+<a class="bg-primary-container/10 text-primary border-l-2 border-primary-container flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs brightness-125" href="#">
+<span class="material-symbols-outlined text-[18px]">navigation</span>
+                Navigator
+            </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                Custodian
+            </a>
+</nav>
+<!-- CTA & Footer Tabs -->
+<div class="p-lg border-t border-outline-variant flex flex-col gap-md">
+<button class="w-full py-sm px-md border border-outline-variant text-primary font-label-xs text-label-xs hover:bg-surface-variant/50 hover:border-primary transition-all flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+                SYSTEM LOGS
+            </button>
+<div class="flex flex-col gap-sm">
+<a class="text-on-surface-variant flex items-center gap-sm px-sm py-xs hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+                    Settings
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-sm py-xs hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-[16px]">help</span>
+                    Support
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-rail-width mt-header-height h-[calc(100vh-header-height-8px)] p-lg overflow-y-auto">
+<!-- Dashboard Header -->
+<div class="mb-lg flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-background mb-xs">Execution & Reserve Management</h1>
+<p class="font-body-default text-body-default text-on-surface-variant">Live telemetry and authoritative action interface for hydrocarbon routing and SPR drawdown.</p>
+</div>
+<div class="flex items-center gap-sm font-data-mono text-data-mono text-secondary-fixed-dim bg-surface-container-high px-md py-xs rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></span>
+                SYNC: LIVE
+            </div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-lg h-full pb-[40px]">
+<!-- Left Column: Data & Viz (2/3 width) -->
+<div class="xl:col-span-2 flex flex-col gap-lg h-full">
+<!-- Navigator Route Ranking Module -->
+<section class="flex-1 bg-surface-container border border-outline-variant rounded-DEFAULT flex flex-col overflow-hidden glow-effect transition-all duration-300">
+<div class="bg-surface-container-high border-b border-outline-variant px-md py-sm flex justify-between items-center">
+<h2 class="font-label-xs text-label-xs text-on-surface uppercase tracking-wider flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[16px]">alt_route</span>
+                            Navigator Route Ranking
+                        </h2>
+<span class="font-data-mono text-code-log text-on-surface-variant">UPDATED: 0s AGO</span>
+</div>
+<div class="p-sm flex-1 overflow-y-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="font-label-xs text-label-xs text-on-surface-variant border-b border-outline-variant/50">
+<th class="pb-xs pl-sm font-normal">SOURCE / ROUTE</th>
+<th class="pb-xs font-normal">RELIABILITY WEIGHT</th>
+<th class="pb-xs font-normal">LANDED COST</th>
+<th class="pb-xs pr-sm text-right font-normal">ACTION</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-background">
+<!-- Row 1: Optimal -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm pl-sm">
+<div class="flex flex-col">
+<span class="text-primary-fixed-dim font-bold">WAF-VLCC-GULF</span>
+<span class="font-code-log text-code-log text-on-surface-variant">West Africa via Cape</span>
+</div>
+</td>
+<td class="py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-24 h-1 bg-surface-container-high rounded overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 94%;"></div>
+</div>
+<span class="text-primary-container">0.94</span>
+</div>
+</td>
+<td class="py-sm">$82.45<span class="text-on-surface-variant text-[10px]">/bbl</span></td>
+<td class="py-sm pr-sm text-right">
+<span class="px-sm py-xs bg-primary-container/20 text-primary-container border border-primary-container/50 rounded font-label-xs text-label-xs">OPTIMAL</span>
+</td>
+</tr>
+<!-- Row 2: Secondary -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm pl-sm">
+<div class="flex flex-col">
+<span>MEG-SUEZ-USGC</span>
+<span class="font-code-log text-code-log text-on-surface-variant">Middle East via Suez</span>
+</div>
+</td>
+<td class="py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-24 h-1 bg-surface-container-high rounded overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim" style="width: 78%;"></div>
+</div>
+<span class="text-secondary-fixed-dim">0.78</span>
+</div>
+</td>
+<td class="py-sm">$85.10<span class="text-on-surface-variant text-[10px]">/bbl</span></td>
+<td class="py-sm pr-sm text-right">
+<span class="px-sm py-xs border border-outline-variant text-on-surface-variant rounded font-label-xs text-label-xs">VIABLE</span>
+</td>
+</tr>
+<!-- Row 3: Warning -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm pl-sm">
+<div class="flex flex-col">
+<span>NS-AFRA-NWE</span>
+<span class="font-code-log text-code-log text-on-surface-variant">North Sea Aframax</span>
+</div>
+</td>
+<td class="py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-24 h-1 bg-surface-container-high rounded overflow-hidden">
+<div class="h-full bg-error" style="width: 42%;"></div>
+</div>
+<span class="text-error">0.42</span>
+</div>
+</td>
+<td class="py-sm">$91.20<span class="text-on-surface-variant text-[10px]">/bbl</span></td>
+<td class="py-sm pr-sm text-right">
+<span class="px-sm py-xs bg-error/10 text-error border border-error/50 rounded font-label-xs text-label-xs flex items-center justify-end gap-xs inline-flex">
+<span class="material-symbols-outlined text-[12px]">warning</span> RISK
+                                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Custodian SPR Manager Module -->
+<section class="h-[280px] bg-surface-container border border-outline-variant rounded-DEFAULT flex flex-col overflow-hidden glow-effect transition-all duration-300">
+<div class="bg-surface-container-high border-b border-outline-variant px-md py-sm flex justify-between items-center">
+<h2 class="font-label-xs text-label-xs text-on-surface uppercase tracking-wider flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[16px]">inventory</span>
+                            Custodian SPR Manager
+                        </h2>
+<div class="flex gap-sm">
+<span class="font-data-mono text-code-log text-on-surface-variant bg-surface-variant px-sm py-xs rounded">CAPACITY: 714M BBL</span>
+</div>
+</div>
+<div class="flex-1 p-md flex gap-lg relative">
+<!-- Background Scanline effect -->
+<div class="absolute inset-0 scanline opacity-50"></div>
+<!-- Left: Main Metrics -->
+<div class="w-1/3 flex flex-col justify-center border-r border-outline-variant/30 pr-md">
+<div class="mb-md">
+<span class="font-label-xs text-label-xs text-on-surface-variant uppercase">Current Level</span>
+<div class="font-data-mono text-[32px] font-bold text-on-background leading-tight">342.5<span class="text-[14px] text-on-surface-variant">M bbl</span></div>
+</div>
+<div class="mb-md">
+<span class="font-label-xs text-label-xs text-on-surface-variant uppercase">Days of Cover</span>
+<div class="font-data-mono text-[24px] font-medium text-secondary-fixed-dim">48 <span class="text-[12px] text-on-surface-variant">DAYS</span></div>
+</div>
+<div>
+<span class="font-label-xs text-label-xs text-on-surface-variant uppercase">Projected Drawdown</span>
+<div class="font-data-mono text-headline-md text-error">-1.2M <span class="text-[12px] text-on-surface-variant">bbl/day</span></div>
+</div>
+</div>
+<!-- Right: Visualization Chart (Simulated with CSS) -->
+<div class="flex-1 flex flex-col justify-end pt-md relative z-10">
+<!-- Y-axis labels -->
+<div class="absolute left-0 top-0 h-full flex flex-col justify-between text-code-log font-code-log text-outline-variant pb-[20px]">
+<span>700M</span>
+<span>500M</span>
+<span>300M</span>
+<span>100M</span>
+</div>
+<!-- Chart Area -->
+<div class="flex-1 ml-[40px] border-l border-b border-outline-variant flex items-end gap-xs pb-0 px-xs h-full relative">
+<!-- Target Line -->
+<div class="absolute top-[30%] left-0 w-full border-t border-dashed border-secondary-fixed-dim/50 z-0"></div>
+<span class="absolute top-[30%] right-0 -mt-[8px] font-code-log text-[10px] text-secondary-fixed-dim bg-background px-xs">MIN_THRESHOLD</span>
+<!-- Bars (Historical -> Current -> Projected) -->
+<div class="w-full flex justify-between items-end h-full pt-lg z-10">
+<div class="w-[12%] bg-surface-variant h-[60%] border-t border-outline"></div>
+<div class="w-[12%] bg-surface-variant h-[55%] border-t border-outline"></div>
+<div class="w-[12%] bg-surface-variant h-[52%] border-t border-outline"></div>
+<div class="w-[12%] bg-primary-container h-[48%] shadow-[0_0_8px_rgba(0,209,255,0.4)] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-mono text-code-log text-primary-fixed bg-surface-container-high px-xs rounded whitespace-nowrap">CURRENT</div>
+</div>
+<!-- Projected Drawdown (Red) -->
+<div class="w-[12%] bg-surface-variant border border-error/50 h-[45%] flex flex-col justify-start">
+<div class="w-full h-2 bg-error/80"></div>
+</div>
+<div class="w-[12%] bg-surface-variant border border-error/50 h-[42%] flex flex-col justify-start">
+<div class="w-full h-2 bg-error/80"></div>
+</div>
+<!-- Replenishment (Green/Secondary) -->
+<div class="w-[12%] bg-surface-variant border border-secondary/50 h-[46%] flex flex-col justify-end">
+<div class="w-full h-4 bg-secondary/80"></div>
+</div>
+</div>
+</div>
+<!-- X-axis labels -->
+<div class="ml-[40px] flex justify-between mt-sm text-code-log font-code-log text-outline-variant">
+<span>T-3</span>
+<span>T-2</span>
+<span>T-1</span>
+<span class="text-primary-container">T0</span>
+<span>T+1</span>
+<span>T+2</span>
+<span>T+3</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Decision Brief & Action -->
+<div class="flex flex-col gap-lg h-full">
+<!-- Decision Brief Module (Glassmorphism Terminal) -->
+<section class="flex-1 bg-surface-container-low/90 backdrop-blur-xl border border-outline-variant rounded-DEFAULT flex flex-col overflow-hidden relative">
+<!-- Top Bar -->
+<div class="bg-surface-container-high border-b border-outline-variant px-md py-xs flex justify-between items-center">
+<span class="font-label-xs text-label-xs text-on-surface uppercase flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">gavel</span>
+                            Decision Brief
+                        </span>
+<div class="flex gap-xs">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 overflow-y-auto font-code-log text-code-log text-on-surface-variant leading-relaxed flex flex-col gap-md">
+<div class="text-primary-fixed border-l-2 border-primary-container pl-sm">
+<span class="font-bold">> SUPERVISOR RECOMMENDATION:</span>
+<br/>INITIATE HYBRID CONTINGENCY PROTOCOL [HC-09]
+                        </div>
+<div>
+<span class="text-secondary-fixed-dim">>> CONTEXT:</span>
+<br/>Supply disruption detected at Node_Delta (Strait of Hormuz transit). Expected duration: 14 days. Deficit magnitude: 4.5M bbl.
+                        </div>
+<div>
+<span class="text-secondary-fixed-dim">>> NAVIGATOR ACTION:</span>
+<br/>Reroute 2x VLCC via WAF-Cape [Confidence: 0.94]. Estimated landed cost variance: +$2.15/bbl. Time penalty: +8 days.
+                        </div>
+<div>
+<span class="text-secondary-fixed-dim">>> CUSTODIAN ACTION:</span>
+<br/>Authorize SPR drawdown of 1.2M bbl/day for 5 days to bridge immediate local deficit. Projected level post-drawdown: 336.5M bbl (Above critical threshold).
+                        </div>
+<div class="mt-auto border-t border-outline-variant/30 pt-md text-[10px]">
+                            AWAITING HUMAN COMMAND AUTHORIZATION...
+                        </div>
+</div>
+</section>
+<!-- Action Module -->
+<section class="bg-surface-container border border-outline-variant rounded-DEFAULT p-md flex flex-col gap-sm">
+<p class="font-label-xs text-label-xs text-on-surface-variant text-center mb-xs uppercase tracking-widest">Final Authorization</p>
+<button class="w-full py-md bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-DEFAULT hover:brightness-110 active:scale-[0.98] transition-all flex justify-center items-center gap-sm shadow-[0_0_15px_rgba(0,209,255,0.2)]">
+<span class="material-symbols-outlined">fingerprint</span>
+                        AUTHORIZE EXECUTION
+                    </button>
+<button class="w-full py-sm border border-outline-variant text-primary-container font-headline-md text-headline-md rounded-DEFAULT hover:bg-surface-variant/30 transition-all">
+                        Dismiss Recommendation
+                    </button>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lg py-xs h-sm bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="font-brand-title text-label-xs text-on-surface-variant flex items-center gap-sm">
+<span class="material-symbols-outlined text-[14px]">policy</span>
+            © 2024 PRAHARI RESILIENCE NETWORK | SYSTEM_VERSION_4.2.0
+        </div>
+<div class="flex gap-md font-data-mono text-code-log text-on-surface-variant hover:text-primary transition-colors cursor-pointer group overflow-hidden">
+<div class="flex gap-md animate-[pulse_4s_ease-in-out_infinite]">
+<a class="hover:text-primary-fixed font-bold" href="#">API_DOCS</a>
+<span class="text-outline-variant">|</span>
+<a class="hover:text-primary-fixed font-bold" href="#">LATENCY_STATS</a>
+<span class="text-outline-variant">|</span>
+<a class="hover:text-primary-fixed font-bold" href="#">SECURITY_PROTOCOL</a>
+</div>
+</div>
+</footer>
+</body></html>

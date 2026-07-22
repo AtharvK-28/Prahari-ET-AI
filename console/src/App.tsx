@@ -1,17 +1,18 @@
 import { useEffect } from "react";
 import { useStore } from "./store";
-import TopBar from "./components/TopBar";
-import MapTwin from "./components/MapTwin";
-import RiskPanel from "./components/RiskPanel";
-import ScenarioPanel from "./components/ScenarioPanel";
-import PlanPanel from "./components/PlanPanel";
-import BriefCard from "./components/BriefCard";
+import TopNav from "./components/TopNav";
+import Sidebar from "./components/Sidebar";
+import StatusBar from "./components/StatusBar";
 import SignalTicker from "./components/SignalTicker";
+import BriefCard from "./components/BriefCard";
+import OverviewView from "./views/OverviewView";
+import SentinelView from "./views/SentinelView";
+import OracleView from "./views/OracleView";
+import ActionView from "./views/ActionView";
 
 export default function App() {
   const boot = useStore((s) => s.boot);
-  const tab = useStore((s) => s.tab);
-  const setTab = useStore((s) => s.setTab);
+  const view = useStore((s) => s.view);
   const status = useStore((s) => s.status);
 
   useEffect(() => {
@@ -20,31 +21,21 @@ export default function App() {
 
   return (
     <div className="shell">
-      <TopBar />
+      <TopNav />
       <div className="main">
-        <div className="map-pane">
-          <MapTwin />
+        <Sidebar />
+        <div className="workspace">
+          {view === "overview" && <OverviewView />}
+          {view === "sentinel" && <SentinelView />}
+          {view === "oracle" && <OracleView />}
+          {view === "action" && <ActionView />}
           {!status && (
-            <div className="boot-overlay">
-              connecting to PRAHARI backend on :8000…
-            </div>
+            <div className="boot-overlay">connecting to PRAHARI backend on :8000…</div>
           )}
         </div>
-        <aside className="rail">
-          <nav className="tabs">
-            {(["risk", "scenario", "plan"] as const).map((t) => (
-              <button key={t} className={`tab ${tab === t ? "tab-on" : ""}`}
-                onClick={() => setTab(t)}>
-                {t === "risk" ? "⚡ Risk" : t === "scenario" ? "🌀 Scenario" : "🧭 Plan"}
-              </button>
-            ))}
-          </nav>
-          {tab === "risk" && <RiskPanel />}
-          {tab === "scenario" && <ScenarioPanel />}
-          {tab === "plan" && <PlanPanel />}
-        </aside>
       </div>
       <SignalTicker />
+      <StatusBar />
       <BriefCard />
     </div>
   );

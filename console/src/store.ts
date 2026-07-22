@@ -30,6 +30,7 @@ interface PrahariState {
   loopStarted: number | null;
   loopElapsed: number;
   tab: "risk" | "scenario" | "plan";
+  view: "overview" | "sentinel" | "oracle" | "action";
   wsConnected: boolean;
   calibration: ShockCalibration | null;
   weather: Record<string, CorridorWeather>;
@@ -37,6 +38,7 @@ interface PrahariState {
   boot: () => Promise<void>;
   select: (id: string | null) => void;
   setTab: (tab: "risk" | "scenario" | "plan") => void;
+  setView: (view: "overview" | "sentinel" | "oracle" | "action") => void;
   setScenario: (s: ScenarioImpact) => void;
   setPlan: (p: ProcurementPlan) => void;
   setSpr: (s: SPRSchedule) => void;
@@ -62,6 +64,7 @@ export const useStore = create<PrahariState>((set, get) => ({
   loopStarted: null,
   loopElapsed: 0,
   tab: "risk",
+  view: "overview",
   wsConnected: false,
   calibration: null,
   weather: {},
@@ -100,6 +103,7 @@ export const useStore = create<PrahariState>((set, get) => ({
 
   select: (id) => set({ selectedCorridor: id }),
   setTab: (tab) => set({ tab }),
+  setView: (view) => set({ view }),
   setScenario: (scenario) => set({ scenario }),
   setPlan: (plan) => set({ plan }),
   setSpr: (spr) => set({ spr }),

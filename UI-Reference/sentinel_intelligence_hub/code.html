@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRAHARI - Sentinel Intelligence Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#ffba20",
+                      "tertiary-fixed-dim": "#ebb2ff",
+                      "on-secondary": "#412d00",
+                      "on-background": "#d4e4fa",
+                      "on-primary-container": "#00566a",
+                      "surface-variant": "#273647",
+                      "on-primary-fixed": "#001f28",
+                      "on-secondary-container": "#6b4b00",
+                      "secondary-container": "#feb700",
+                      "on-secondary-fixed": "#271900",
+                      "secondary": "#ffdb9d",
+                      "surface-container": "#122131",
+                      "on-surface-variant": "#bbc9cf",
+                      "tertiary-container": "#e8a9ff",
+                      "primary": "#a4e6ff",
+                      "on-tertiary-fixed-variant": "#692984",
+                      "secondary-fixed": "#ffdea8",
+                      "on-primary-fixed-variant": "#004e60",
+                      "primary-container": "#00d1ff",
+                      "surface-container-lowest": "#010f1f",
+                      "outline": "#859399",
+                      "on-primary": "#003543",
+                      "on-surface": "#d4e4fa",
+                      "surface-container-low": "#0d1c2d",
+                      "error-container": "#93000a",
+                      "inverse-primary": "#00677f",
+                      "on-error": "#690005",
+                      "primary-fixed-dim": "#4cd6ff",
+                      "on-secondary-fixed-variant": "#5e4200",
+                      "surface-tint": "#4cd6ff",
+                      "tertiary": "#f5cfff",
+                      "inverse-surface": "#d4e4fa",
+                      "background": "#051424",
+                      "surface-container-high": "#1c2b3c",
+                      "outline-variant": "#3c494e",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-highest": "#273647",
+                      "on-tertiary-fixed": "#320047",
+                      "on-tertiary": "#500a6c",
+                      "tertiary-fixed": "#f8d8ff",
+                      "surface-dim": "#051424",
+                      "surface": "#051424",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary-container": "#71318c",
+                      "inverse-on-surface": "#233143",
+                      "error": "#ffb4ab",
+                      "primary-fixed": "#b7eaff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "header-height": "48px",
+                      "sm": "8px",
+                      "lg": "16px",
+                      "unit": "4px",
+                      "rail-width": "400px",
+                      "md": "12px",
+                      "xl": "24px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "brand-title": [
+                              "Inter"
+                      ],
+                      "body-default": [
+                              "Inter"
+                      ],
+                      "label-xs": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "data-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "code-log": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "brand-title": [
+                              "15px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.12em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-default": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-xs": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.04em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-mono": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "code-log": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #051424; /* background */
+            color: #d4e4fa; /* on-background */
+        }
+        
+        .map-grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(35, 45, 63, 0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(35, 45, 63, 0.3) 1px, transparent 1px);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 8px rgba(0, 209, 255, 0.4);
+        }
+        
+        .neon-glow-error {
+            box-shadow: 0 0 8px rgba(255, 75, 75, 0.4);
+        }
+
+        .hairline-border {
+            border: 1px solid #232D3F;
+        }
+
+        .glass-panel {
+            background-color: rgba(17, 23, 34, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        
+        .ticker-scroll {
+            animation: ticker 30s linear infinite;
+        }
+        
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #232D3F;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00D1FF;
+        }
+      </style>
+</head>
+<body class="font-body-default text-body-default antialiased overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lg h-header-height bg-surface-container dark:bg-surface-container border-b border-outline-variant bg-surface-container/80 backdrop-blur-md">
+<div class="flex items-center gap-xl h-full">
+<div class="font-brand-title text-brand-title text-primary dark:text-primary tracking-widest flex items-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+                PRAHARI
+            </div>
+<nav class="hidden md:flex items-center h-full gap-lg ml-xl">
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200 h-full flex items-center" href="#">Strategic Overview</a>
+<a class="text-primary border-b-2 border-primary font-headline-md h-full flex items-center" href="#">Intelligence Hub</a>
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200 h-full flex items-center" href="#">Simulation</a>
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200 h-full flex items-center" href="#">Action Center</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:flex items-center">
+<input class="bg-surface-container-high border outline-variant text-on-surface placeholder-on-surface-variant font-data-mono text-data-mono rounded px-md py-sm w-64 focus:border-primary-container focus:ring-0 transition-colors focus:shadow-[0_0_8px_rgba(0,209,255,0.2)]" placeholder="Search entity or coordinates..." type="text"/>
+<span class="material-symbols-outlined absolute right-md text-on-surface-variant pointer-events-none text-[18px]">search</span>
+</div>
+<button class="bg-[linear-gradient(135deg,#FF4B4B,#93000a)] text-white font-headline-md text-headline-md px-lg py-sm rounded border border-[#FF4B4B]/50 hover:brightness-110 transition-all flex items-center gap-sm shadow-[0_0_12px_rgba(255,75,75,0.3)]">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+                Trigger Demo
+            </button>
+<div class="flex items-center gap-sm ml-md border-l border-outline-variant pl-md">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-xs rounded hover:bg-surface-variant/50">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-xs rounded hover:bg-surface-variant/50">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-xs rounded hover:bg-surface-variant/50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar & Main Content Split Pane -->
+<div class="flex h-[calc(100vh-48px-32px)] mt-[48px]">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col fixed left-0 top-header-height h-[calc(100vh-header-height-32px)] w-rail-width z-40 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant bg-surface-container-low/90 backdrop-blur-xl shrink-0">
+<div class="p-lg border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded bg-surface-variant border border-outline-variant flex items-center justify-center overflow-hidden shrink-0 relative">
+<img alt="User Operational Profile" class="w-full h-full object-cover opacity-80" data-alt="A futuristic, high-tech abstract avatar or profile icon in deep cybernetic blues and slates, conveying an authoritative command node identity within a digital twin environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSAc8E9pJIb04t7dLw87BVj3kBlrzKLkZeFcsVqe-pwTgcU3p29ogWxuqh4pppMAtCm0es_tYBd8K-HIQj8BH7MxYJhUWazLhurYgORwL1xKDmQPYb3nE3nbE37QYGz08Tre4LVBae60dHhWmSaaqSxwzvOHZoCKH0k1vtswevpVXBZtpJfnNS5uS2kXGbYIAEb1UmXb4Lo1zc3CwvggnkHOK6LXaPkPiE1xX2qifuu-8i5KpVh83Yaj0pNSZVPWjR3iVZF2yBmJo"/>
+<div class="absolute inset-0 border border-primary/30 rounded pointer-events-none"></div>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">COMMAND_NODE_01</div>
+<div class="font-data-mono text-code-log text-primary-container flex items-center gap-xs mt-unit">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+                            Operational Status: ACTIVE
+                        </div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-md flex flex-col gap-unit">
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs uppercase tracking-wider" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Overview
+                </a>
+<a class="bg-primary-container/10 text-primary border-l-2 border-primary-container flex items-center gap-sm px-lg py-md font-label-xs text-label-xs uppercase tracking-wider brightness-125" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">radar</span>
+                    Sentinel
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs uppercase tracking-wider" href="#">
+<span class="material-symbols-outlined">psychology</span>
+                    Oracle
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs uppercase tracking-wider" href="#">
+<span class="material-symbols-outlined">navigation</span>
+                    Navigator
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs uppercase tracking-wider" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                    Custodian
+                </a>
+</div>
+<div class="p-lg border-t border-outline-variant mt-auto">
+<button class="w-full border border-outline-variant text-primary-container font-label-xs text-label-xs uppercase py-sm rounded hover:border-primary-container hover:bg-primary-container/5 transition-all flex items-center justify-center gap-sm mb-md">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+                    SYSTEM LOGS
+                </button>
+<div class="flex flex-col gap-unit">
+<a class="text-on-surface-variant flex items-center gap-sm px-md py-sm hover:text-primary transition-all font-label-xs text-label-xs uppercase" href="#">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+                        Settings
+                    </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-md py-sm hover:text-primary transition-all font-label-xs text-label-xs uppercase" href="#">
+<span class="material-symbols-outlined text-[16px]">help</span>
+                        Support
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Canvas (Map & Content) -->
+<main class="flex-1 md:ml-rail-width relative bg-background overflow-hidden flex flex-col md:flex-row">
+<!-- Map Background -->
+<div class="absolute inset-0 z-0 map-grid-pattern opacity-30"></div>
+<!-- Example dynamic map graphic injection point -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none mix-blend-screen" data-alt="A dark, highly technical digital twin map of maritime routes, featuring glowing cyan and crimson nodes representing vessel traffic and geopolitical risk zones, overlaid with faint telemetry data grids." data-location="Strait of Hormuz" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtx9DqPWq8aeR-EyQDmjSYf-I-nBxeTYnePs_UWknbhOR6e5Qnuat5CjfHpxVI8N7B5GHNWAKNdv5juizF2Z_UUi5V1gFjZGYhjHVDmJKK2yoNVzIlUUlCwecynJscgIP59LQekmcrZUqIYuj1I4ZDj9M_wuGTlXH42N_nkJI6HEq3Mlx3QroGXkRlb_etkTr53xzc3Fp4iQbHt35FIxV4A38XQgOrAXbC6OtMAh0Lce62kHpB3SmOeU-XHvvcIr4Ly0Ldmq_6ork')"></div>
+<!-- Left Map Canvas Area (Visual Context) -->
+<div class="flex-1 relative z-10 p-lg hidden xl:block">
+<!-- Explainable CDP Chart Module overlaying map -->
+<div class="absolute bottom-lg left-lg w-80 glass-panel hairline-border rounded-lg overflow-hidden">
+<div class="bg-surface-container-high px-sm py-xs border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-xs text-label-xs uppercase text-on-surface-variant tracking-wider">Risk Telemetry Breakdown</span>
+<span class="material-symbols-outlined text-[14px] text-primary-container">donut_large</span>
+</div>
+<div class="p-md space-y-md">
+<!-- Synthetic Chart Graphic -->
+<div class="h-32 relative flex items-center justify-center">
+<!-- Placeholder for an actual chart/shader -->
+<div class="absolute w-24 h-24 rounded-full border-4 border-surface-variant border-t-error border-r-primary border-b-secondary animate-[spin_10s_linear_infinite]"></div>
+<div class="absolute w-16 h-16 rounded-full border-2 border-surface border-l-primary-container animate-[spin_5s_linear_reverse_infinite]"></div>
+<div class="font-data-mono text-headline-lg text-error">84%</div>
+</div>
+<div class="space-y-sm font-data-mono text-data-mono">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="w-2 h-2 bg-error rounded-sm"></span> AIS Anomalies
+                                </div>
+<span class="text-error">42%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 42%"></div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="w-2 h-2 bg-primary rounded-sm"></span> Sentiment Shift
+                                </div>
+<span class="text-primary">28%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 28%"></div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="w-2 h-2 bg-secondary rounded-sm"></span> Market Volatility
+                                </div>
+<span class="text-secondary">14%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 14%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Control Rail (Data Density) -->
+<div class="w-full xl:w-[480px] h-full glass-panel border-l border-outline-variant z-20 flex flex-col shrink-0 overflow-y-auto">
+<div class="p-md border-b border-outline-variant bg-surface-container-high/50 sticky top-0 z-10 backdrop-blur-md">
+<h1 class="font-headline-lg text-headline-lg text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container">troubleshoot</span>
+                        Intelligence Feed
+                    </h1>
+</div>
+<div class="flex-1 p-md flex flex-col gap-md">
+<!-- Sanctions Monitor -->
+<section class="bg-surface-container rounded-lg hairline-border overflow-hidden">
+<div class="bg-surface-container-highest px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-label-xs text-label-xs uppercase text-error flex items-center gap-xs tracking-wider">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+                                OFAC Sanctions Alert
+                            </h2>
+<span class="bg-error/20 text-error font-data-mono text-[10px] px-unit py-px rounded border border-error/50">LIVE</span>
+</div>
+<div class="p-sm">
+<div class="bg-error-container/10 border border-error/30 rounded p-sm flex gap-sm items-start">
+<span class="material-symbols-outlined text-error mt-unit text-[18px]">policy</span>
+<div>
+<div class="font-data-mono text-data-mono text-on-surface mb-unit">Entity Match Detected: Vessel ID [IMO:9438901]</div>
+<div class="font-body-default text-[12px] text-on-surface-variant">Attempted port entry at designated high-risk zone (Zone_Delta_4). Historical trajectory suggests STS transfer evasion tactics.</div>
+<div class="mt-sm flex gap-sm">
+<button class="text-[11px] font-label-xs uppercase border border-error text-error px-sm py-xs rounded hover:bg-error/10 transition-colors">Isolate Node</button>
+<button class="text-[11px] font-label-xs uppercase text-on-surface-variant hover:text-on-surface px-sm py-xs">View Graph</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Live AIS Vessel Tracking List -->
+<section class="bg-surface-container rounded-lg hairline-border flex flex-col flex-1 min-h-[300px]">
+<div class="bg-surface-container-highest px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-label-xs text-label-xs uppercase text-on-surface-variant flex items-center gap-xs tracking-wider">
+<span class="material-symbols-outlined text-[16px]">directions_boat</span>
+                                Priority AIS Targets
+                            </h2>
+<span class="material-symbols-outlined text-primary-container text-[16px] animate-pulse">sensors</span>
+</div>
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-unit px-md py-xs border-b border-outline-variant font-label-xs text-[10px] uppercase text-on-surface-variant bg-surface-container-low">
+<div class="col-span-3">Vessel ID</div>
+<div class="col-span-3">Cargo</div>
+<div class="col-span-4">Vector</div>
+<div class="col-span-2 text-right">Risk</div>
+</div>
+<!-- Table Body -->
+<div class="overflow-y-auto flex-1 p-sm space-y-unit">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 gap-unit items-center p-xs hover:bg-surface-variant/30 rounded border border-transparent hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="col-span-3 font-data-mono text-data-mono text-primary-fixed group-hover:text-primary-container transition-colors">MT-AQUA-09</div>
+<div class="col-span-3 text-[12px] text-on-surface truncate">Crude Oil</div>
+<div class="col-span-4 text-[11px] text-on-surface-variant font-data-mono truncate">SG &gt; CN (Malacca)</div>
+<div class="col-span-2 flex justify-end">
+<span class="bg-error/20 text-error border border-error/50 px-unit py-px rounded font-data-mono text-[11px]">89</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 gap-unit items-center p-xs hover:bg-surface-variant/30 rounded border border-transparent hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="col-span-3 font-data-mono text-data-mono text-primary-fixed group-hover:text-primary-container transition-colors">VLCC-NOVA</div>
+<div class="col-span-3 text-[12px] text-on-surface truncate">LNG</div>
+<div class="col-span-4 text-[11px] text-on-surface-variant font-data-mono truncate">QA &gt; JP (S. China)</div>
+<div class="col-span-2 flex justify-end">
+<span class="bg-secondary/20 text-secondary border border-secondary/50 px-unit py-px rounded font-data-mono text-[11px]">64</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-12 gap-unit items-center p-xs hover:bg-surface-variant/30 rounded border border-transparent hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="col-span-3 font-data-mono text-data-mono text-primary-fixed group-hover:text-primary-container transition-colors">CHEM-ZETA</div>
+<div class="col-span-3 text-[12px] text-on-surface truncate">Chemicals</div>
+<div class="col-span-4 text-[11px] text-on-surface-variant font-data-mono truncate">NL &gt; BR (Atlantic)</div>
+<div class="col-span-2 flex justify-end">
+<span class="bg-surface-variant text-on-surface-variant border border-outline px-unit py-px rounded font-data-mono text-[11px]">21</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-12 gap-unit items-center p-xs hover:bg-surface-variant/30 rounded border border-transparent hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="col-span-3 font-data-mono text-data-mono text-primary-fixed group-hover:text-primary-container transition-colors">MT-ECHO-88</div>
+<div class="col-span-3 text-[12px] text-on-surface truncate">Refined Prod.</div>
+<div class="col-span-4 text-[11px] text-on-surface-variant font-data-mono truncate">AE &gt; IN (Arabian)</div>
+<div class="col-span-2 flex justify-end">
+<span class="bg-error/20 text-error border border-error/50 px-unit py-px rounded font-data-mono text-[11px]">92</span>
+</div>
+</div>
+</div>
+</section>
+<!-- News Sentiment Feed (GDELT) -->
+<section class="bg-surface-container rounded-lg hairline-border">
+<div class="bg-surface-container-highest px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-label-xs text-label-xs uppercase text-on-surface-variant flex items-center gap-xs tracking-wider">
+<span class="material-symbols-outlined text-[16px]">newspaper</span>
+                                GDELT Sentiment Stream
+                            </h2>
+</div>
+<div class="p-sm flex flex-col gap-sm">
+<!-- News Item 1 -->
+<a class="block p-sm border border-outline-variant rounded bg-surface hover:border-primary-container transition-colors group" href="#">
+<div class="flex justify-between items-start mb-xs">
+<div class="font-data-mono text-[10px] text-primary-container">REUTERS • 2m ago</div>
+<span class="material-symbols-outlined text-[14px] text-error" title="Negative Sentiment">trending_down</span>
+</div>
+<h3 class="text-[13px] font-semibold text-on-surface leading-tight mb-xs group-hover:text-primary-fixed transition-colors">Naval escorts increased following unidentified drone activity near major transit chokepoint.</h3>
+<div class="flex gap-unit">
+<span class="px-unit py-px bg-surface-variant text-[9px] font-data-mono text-on-surface-variant rounded">GEOPOLITICS</span>
+<span class="px-unit py-px bg-surface-variant text-[9px] font-data-mono text-on-surface-variant rounded">MARITIME</span>
+</div>
+</a>
+<!-- News Item 2 -->
+<a class="block p-sm border border-outline-variant rounded bg-surface hover:border-primary-container transition-colors group" href="#">
+<div class="flex justify-between items-start mb-xs">
+<div class="font-data-mono text-[10px] text-primary-container">BLOOMBERG • 15m ago</div>
+<span class="material-symbols-outlined text-[14px] text-secondary" title="Neutral Sentiment">trending_flat</span>
+</div>
+<h3 class="text-[13px] font-semibold text-on-surface leading-tight mb-xs group-hover:text-primary-fixed transition-colors">OPEC+ delegates review output quotas amidst shifting regional stability indices.</h3>
+<div class="flex gap-unit">
+<span class="px-unit py-px bg-surface-variant text-[9px] font-data-mono text-on-surface-variant rounded">MARKETS</span>
+</div>
+</a>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lg py-xs h-sm bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="font-brand-title text-label-xs text-on-surface-variant flex items-center gap-sm">
+            © 2024 PRAHARI RESILIENCE NETWORK | SYSTEM_VERSION_4.2.0
+        </div>
+<!-- Live Ticker in Footer Center -->
+<div class="hidden lg:flex flex-1 mx-xl overflow-hidden relative h-full items-center max-w-2xl border-l border-r border-outline-variant px-md">
+<div class="absolute whitespace-nowrap flex gap-lg font-data-mono text-code-log text-primary-fixed-dim ticker-scroll hover:[animation-play-state:paused]">
+<span class="flex items-center gap-xs"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> GLOBAL_RISK_IDX: 42.1 ↑</span>
+<span class="flex items-center gap-xs text-on-surface-variant">|</span>
+<span class="flex items-center gap-xs"><span class="w-1.5 h-1.5 bg-error rounded-full animate-pulse"></span> CHOKEPOINT_HORMUZ: ALERT_LEVEL_3</span>
+<span class="flex items-center gap-xs text-on-surface-variant">|</span>
+<span class="flex items-center gap-xs"><span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> MARKET_VOLATILITY: NOMINAL</span>
+<span class="flex items-center gap-xs text-on-surface-variant">|</span>
+<span class="flex items-center gap-xs"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> ACTIVE_NODES: 12,408</span>
+</div>
+</div>
+<div class="flex items-center gap-md font-data-mono text-code-log">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">API_DOCS</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">LATENCY_STATS</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">SECURITY_PROTOCOL</a>
+</div>
+</footer>
+</body></html>

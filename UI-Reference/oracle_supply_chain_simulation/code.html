@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Oracle Supply Chain Simulation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#ffba20",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "on-secondary": "#412d00",
+                        "on-background": "#d4e4fa",
+                        "on-primary-container": "#00566a",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#001f28",
+                        "on-secondary-container": "#6b4b00",
+                        "secondary-container": "#feb700",
+                        "on-secondary-fixed": "#271900",
+                        "secondary": "#ffdb9d",
+                        "surface-container": "#122131",
+                        "on-surface-variant": "#bbc9cf",
+                        "tertiary-container": "#e8a9ff",
+                        "primary": "#a4e6ff",
+                        "on-tertiary-fixed-variant": "#692984",
+                        "secondary-fixed": "#ffdea8",
+                        "on-primary-fixed-variant": "#004e60",
+                        "primary-container": "#00d1ff",
+                        "surface-container-lowest": "#010f1f",
+                        "outline": "#859399",
+                        "on-primary": "#003543",
+                        "on-surface": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#00677f",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#4cd6ff",
+                        "on-secondary-fixed-variant": "#5e4200",
+                        "surface-tint": "#4cd6ff",
+                        "tertiary": "#f5cfff",
+                        "inverse-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c",
+                        "outline-variant": "#3c494e",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "on-tertiary-fixed": "#320047",
+                        "on-tertiary": "#500a6c",
+                        "tertiary-fixed": "#f8d8ff",
+                        "surface-dim": "#051424",
+                        "surface": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary-container": "#71318c",
+                        "inverse-on-surface": "#233143",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#b7eaff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "header-height": "48px",
+                        "sm": "8px",
+                        "lg": "16px",
+                        "unit": "4px",
+                        "rail-width": "400px",
+                        "md": "12px",
+                        "xl": "24px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "brand-title": ["Inter"],
+                        "body-default": ["Inter"],
+                        "label-xs": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "code-log": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "brand-title": ["15px", { "lineHeight": "20px", "letterSpacing": "0.12em", "fontWeight": "700" }],
+                        "body-default": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-xs": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+                        "headline-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "data-mono": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "code-log": ["11px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0B0F14; color: #d4e4fa; }
+        .hairline-border { border: 1px solid #232D3F; }
+        .glow-hover:hover { border-color: #00D1FF; box-shadow: 0 0 8px rgba(0, 209, 255, 0.5); }
+        .cyber-gradient { background: linear-gradient(135deg, #FF4B4B 0%, #93000a 100%); }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-default h-screen overflow-hidden flex flex-col">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lg h-header-height bg-surface-container dark:bg-surface-container border-b border-outline-variant bg-surface-container/80 backdrop-blur-md">
+<div class="flex items-center gap-xl">
+<span class="font-brand-title text-brand-title text-primary dark:text-primary tracking-widest">PRAHARI</span>
+<div class="hidden md:flex gap-lg">
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Strategic Overview</a>
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Intelligence Hub</a>
+<a class="text-primary border-b-2 border-primary font-headline-md hover:text-primary-fixed-dim transition-colors duration-200 opacity-80 scale-95" href="#">Simulation</a>
+<a class="text-on-surface-variant font-headline-md hover:text-primary-fixed-dim transition-colors duration-200" href="#">Action Center</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="bg-primary-container text-on-primary-container px-4 py-1 rounded font-label-xs font-bold hover:bg-primary-fixed transition-colors">Trigger Demo</button>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors">account_circle</span>
+</div>
+</nav>
+<!-- Main Layout -->
+<div class="flex flex-1 mt-[48px] overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-header-height)] w-rail-width z-40 flex flex-col bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant bg-surface-container-low/90 backdrop-blur-xl">
+<div class="p-lg border-b border-outline-variant flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-primary">COMMAND_NODE_01</div>
+<div class="font-label-xs text-label-xs text-secondary-fixed-dim">Operational Status: ACTIVE</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-md flex flex-col gap-sm">
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined">dashboard</span> Overview
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined">radar</span> Sentinel
+                </a>
+<a class="bg-primary-container/10 text-primary border-l-2 border-primary-container flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all brightness-125 font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined">psychology</span> Oracle
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined">navigation</span> Navigator
+                </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-lg py-md hover:bg-surface-variant/50 hover:text-primary-fixed transition-all font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined">inventory_2</span> Custodian
+                </a>
+</div>
+<div class="p-md mt-auto border-t border-outline-variant">
+<button class="w-full bg-surface-variant text-primary-fixed font-label-xs py-2 rounded hairline-border glow-hover mb-md">SYSTEM LOGS</button>
+<div class="flex flex-col gap-xs">
+<a class="text-on-surface-variant flex items-center gap-sm px-sm py-1 hover:text-primary transition-colors font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-sm">settings</span> Settings
+                    </a>
+<a class="text-on-surface-variant flex items-center gap-sm px-sm py-1 hover:text-primary transition-colors font-label-xs text-label-xs" href="#">
+<span class="material-symbols-outlined text-sm">help</span> Support
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[400px] flex-1 flex relative bg-[#0B0F14]">
+<!-- Knowledge Graph Visualizer (Canvas) -->
+<div class="absolute inset-0 z-0 opacity-70" data-alt="A dark, minimalist cybernetic data visualization map showing a complex global node-link diagram of supply chains, with deep obsidian background and glowing neon blue and cyan nodes representing ports and refineries, connected by hairline thin technical lines." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBCXGPUW4XNdi9BkzoAleSIPfXdNNdtv8fGLK5X8S-opVRVN4hwB4CJ0w6n8icVcVSgoezKE1PxocwacUerFT2L-1Hmmb5En5sQplts3_fs-rcNNpxQYKGD0HKa3FrPM80BVwLWWtWFmO4afgCl6DwTWe2LJmePJaOy2BRBz3ZHs1IiWoYsXSEp_ExGXMwrD7ga_ehK1-3jgggfyu_jzPw0QXMjIUTcz2Cs9txNXfx-Fnc_irIl4hqscNdDv680dkQEoWl-pDfS5UU')"></div>
+<!-- Overlay Content (Bento Grid) -->
+<div class="relative z-10 w-full p-lg grid grid-cols-12 gap-md pointer-events-none h-full pb-[32px]">
+<!-- Shock Impact Simulator -->
+<div class="col-span-4 col-start-9 bg-[#18202E]/90 backdrop-blur-md hairline-border p-md rounded flex flex-col gap-md pointer-events-auto mt-xl">
+<div class="font-label-xs text-label-xs uppercase text-primary border-b border-outline-variant pb-xs">Shock Impact Simulator</div>
+<div class="flex flex-col gap-sm">
+<label class="font-label-xs text-on-surface-variant">Disruption Vector</label>
+<select class="bg-surface text-primary-fixed font-data-mono text-data-mono hairline-border p-1 rounded focus:border-primary focus:ring-0 focus:shadow-[0_0_8px_rgba(0,209,255,0.5)]">
+<option>Suez Canal Closure</option>
+<option>Strait of Hormuz Blockade</option>
+<option>OPEC+ Production Cut</option>
+</select>
+<label class="font-label-xs text-on-surface-variant mt-sm">Intensity Multiplier</label>
+<input class="w-full accent-error" max="10" min="1" type="range" value="7"/>
+<button class="cyber-gradient text-on-error font-headline-md py-2 rounded mt-md hover:brightness-110 transition-all shadow-lg border border-[#93000a]">INJECT DISRUPTION</button>
+</div>
+</div>
+<!-- Impact Dashboard -->
+<div class="col-span-8 col-start-1 row-start-2 bg-[#18202E]/80 backdrop-blur-md hairline-border p-md rounded flex flex-col gap-sm pointer-events-auto">
+<div class="font-label-xs text-label-xs uppercase text-secondary-fixed-dim border-b border-outline-variant pb-xs flex justify-between">
+<span>Real-Time Telemetry</span>
+<span class="bg-secondary-fixed-dim text-on-secondary px-1 rounded text-[9px] font-bold">LIVE</span>
+</div>
+<div class="grid grid-cols-3 gap-md">
+<div class="bg-surface p-sm hairline-border rounded">
+<div class="font-label-xs text-on-surface-variant">GDP Proxy Impact</div>
+<div class="font-data-mono text-error text-lg mt-xs">-1.24%</div>
+<div class="w-full bg-surface-variant h-1 mt-1 rounded"><div class="bg-error h-1 w-[40%] rounded"></div></div>
+</div>
+<div class="bg-surface p-sm hairline-border rounded">
+<div class="font-label-xs text-on-surface-variant">Oil Price Volatility</div>
+<div class="font-data-mono text-secondary-fixed-dim text-lg mt-xs">+$14.50/bbl</div>
+<div class="w-full bg-surface-variant h-1 mt-1 rounded"><div class="bg-secondary-fixed-dim h-1 w-[75%] rounded"></div></div>
+</div>
+<div class="bg-surface p-sm hairline-border rounded">
+<div class="font-label-xs text-on-surface-variant">SPR Cover Days</div>
+<div class="font-data-mono text-primary text-lg mt-xs">74 Days</div>
+<div class="w-full bg-surface-variant h-1 mt-1 rounded"><div class="bg-primary h-1 w-[60%] rounded"></div></div>
+</div>
+</div>
+</div>
+<!-- Narrative Brief -->
+<div class="col-span-4 col-start-9 row-start-2 bg-[#18202E]/90 backdrop-blur-md hairline-border p-md rounded flex flex-col gap-xs pointer-events-auto h-full">
+<div class="font-label-xs text-label-xs uppercase text-tertiary-fixed-dim border-b border-outline-variant pb-xs">AI Narrative Brief</div>
+<div class="font-code-log text-code-log text-on-surface-variant overflow-y-auto flex-1 mt-sm">
+                        &gt; INITIATING MONTE-CARLO SIM...<br/>
+                        &gt; VECTOR: SUEZ CLOSURE<br/>
+                        &gt; IMPACT: Critical rerouting via Cape of Good Hope adds 14 days to transit times. Immediate shock to crude availability in west-coast refineries. Projected SPR drawdown required within 30 days to stabilize domestic pricing.<br/>
+                        &gt; RECOMMENDATION: Pre-emptive vessel diversions and spot-market acquisitions initiated.
+                    </div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lg py-xs h-sm bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="font-brand-title text-label-xs text-on-surface-variant">© 2024 PRAHARI RESILIENCE NETWORK | SYSTEM_VERSION_4.2.0</div>
+<div class="flex gap-lg font-code-log text-code-log text-secondary-fixed-dim dark:text-secondary-fixed-dim">
+<a class="text-on-surface-variant hover:text-primary" href="#">API_DOCS</a>
+<a class="text-on-surface-variant hover:text-primary" href="#">LATENCY_STATS</a>
+<a class="text-on-surface-variant hover:text-primary" href="#">SECURITY_PROTOCOL</a>
+</div>
+</footer>
+</body></html>
