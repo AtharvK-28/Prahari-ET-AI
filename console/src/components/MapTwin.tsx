@@ -262,12 +262,12 @@ export default function MapTwin() {
         data: fleet,
         getPosition: (v: any) => v.pos,
         getRadius: (v: any) => (v.state === "queued" || v.state === "reversing" ? 13000 : 9000),
-        getRadiusUnits: "meters",
-        radiusMinPixels: 4,
+        radiusUnits: "meters",
+        radiusMinPixels: 5,
         radiusMaxPixels: 14,
         getFillColor: (v: any) => {
           const [r, g, b] = FLEET_COLORS[v.state];
-          return [r, g, b, v.state === "normal" ? 40 : 95];
+          return [r, g, b, v.state === "normal" ? 55 : 105];
         },
         updateTriggers: { getPosition: [timeS], getFillColor: [cutCorridor, reversalActive, recoveryCorridors], getRadius: [cutCorridor, reversalActive] },
       }),
@@ -287,6 +287,7 @@ export default function MapTwin() {
           ? [235, 246, 255, 245] : [255, 255, 255, 255]),
         billboard: false,
         fontFamily: "monospace",
+        characterSet: ["▲"],       // non-ASCII: must be declared or nothing renders
         fontSettings: { sdf: true },
         pickable: true,
         onHover: (info: any) =>
