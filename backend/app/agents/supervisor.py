@@ -11,6 +11,7 @@ template otherwise) only narrates computed values — it invents nothing.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import time
@@ -135,6 +136,7 @@ def _economics(brief: DecisionBrief) -> dict[str, Any]:
     Both converted at the live FRED INR rate (tagged seed_fallback without key).
     """
     from ..ingestion.fred import FX
+    from ..knowledge.graph import KG
     s = brief.scenario
     dur = float(s.event.get("duration_days") or 30)
     inaction_mn_day = s.import_bill_shock_usd_bn * 1000.0 / dur
@@ -144,6 +146,7 @@ def _economics(brief: DecisionBrief) -> dict[str, Any]:
     inr = float(FX["inr_per_usd"])
     return {
         "inr_per_usd": inr, "fx_source": FX["source"],
+        "consumption_kbd": float(KG.seed["national"]["crude_consumption_kbd"]),
         "cost_of_inaction_usd_mn_day": round(inaction_mn_day, 1),
         "cost_of_inaction_inr_crore_day": round(inaction_mn_day * inr / 10.0, 0),
         "plan_premium_usd_mn_day": round(premium_mn_day, 1),
@@ -234,16 +237,57 @@ def _template_narrative(brief: DecisionBrief) -> str:
         spr_rationale=brief.spr.rationale if brief.spr else "not requested")
 
 
-def _audit_write(brief: DecisionBrief) -> None:
+# Tamper-evident ledger: every audit line carries sha256(prev_hash + payload),
+# so any edit or deletion breaks the chain from that point on (verify: /ledger).
+_last_hash = "genesis"
+
+
+def _chain_write(entry: dict[str, Any]) -> str:
+    global _last_hash
+    payload = json.dumps(entry, default=str, sort_keys=True)
+    h = hashlib.sha256((_last_hash + payload).encode()).hexdigest()
+    entry = {**entry, "prev_hash": _last_hash, "hash": h}
+    _last_hash = h
     AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
     with open(AUDIT_LOG, "a", encoding="utf-8") as f:
-        f.write(json.dumps({"brief_id": brief.brief_id, **brief.audit}, default=str) + "\n")
+        f.write(json.dumps(entry, default=str) + "\n")
+    return h
+
+
+def verify_chain() -> dict[str, Any]:
+    """Re-walk the audit file recomputing every hash. O(n), demo-scale."""
+    checked = broken = 0
+    try:
+        with open(AUDIT_LOG, encoding="utf-8") as f:
+            lines = [json.loads(ln) for ln in f if ln.strip()]
+    except FileNotFoundError:
+        return {"entries": 0, "checked": 0, "intact": True}
+    prev = None
+    for e in lines:
+        if "hash" not in e:            # pre-ledger lines: outside the chain
+            continue
+        body = {k: v for k, v in e.items() if k not in ("hash", "prev_hash")}
+        payload = json.dumps(body, default=str, sort_keys=True)
+        expect = hashlib.sha256((e["prev_hash"] + payload).encode()).hexdigest()
+        if expect != e["hash"]:
+            broken += 1
+        elif prev is not None and e["prev_hash"] not in (prev, "genesis"):
+            broken += 1                # "genesis" mid-file = new session segment
+        prev = e["hash"]
+        checked += 1
+    return {"entries": len(lines), "checked": checked, "intact": broken == 0}
+
+
+def _audit_write(brief: DecisionBrief) -> None:
+    h = _chain_write({"kind": "brief", "brief_id": brief.brief_id, **brief.audit})
+    brief.audit["hash"] = h
 
 
 def decide(brief_id: str, approve: bool) -> DecisionBrief:
     brief = BRIEFS[brief_id]
     brief.status = BriefStatus.approved if approve else BriefStatus.dismissed
-    with open(AUDIT_LOG, "a", encoding="utf-8") as f:
-        f.write(json.dumps({"brief_id": brief_id, "decision": brief.status.value,
-                            "decided_at": now_ts()}) + "\n")
+    brief.decided_at = now_ts()
+    h = _chain_write({"kind": "decision", "brief_id": brief_id,
+                      "decision": brief.status.value, "decided_at": brief.decided_at})
+    brief.audit["decision_hash"] = h
     return brief

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { api } from "../lib/api";
 import { useStore } from "../store";
+import DecisionLedger from "../components/DecisionLedger";
 import type { Alternative } from "../lib/types";
 
 function chip(a: Alternative, rank: number): { label: string; cls: string } {
@@ -217,6 +218,7 @@ export default function ActionView() {
             )}
           </div>
         )}
+        <DecisionLedger />
       </div>
     </div>
   );

@@ -35,6 +35,9 @@ export const api = {
   perfectStorm: () =>
     post<{ brief_id: string; elapsed_s: number; storm: boolean }>("/supervisor/perfect_storm", {}),
   resetBoard: () => post<{ reset: boolean }>("/demo/reset", {}),
+  history: (minutes: number) =>
+    get<import("./types").HistorySnapshot>(`/history?minutes=${minutes}`),
+  ledger: () => get<import("./types").LedgerResponse>("/ledger"),
   brief: (id: string) => get<import("./types").DecisionBrief>(`/brief/${id}`),
   decide: (id: string, approve: boolean) =>
     post<import("./types").DecisionBrief>(`/brief/${id}/approve`, { approve }),

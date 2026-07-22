@@ -2,6 +2,7 @@
 // + print-styled export: a clean paper document a ministry desk could file.
 import { createPortal } from "react-dom";
 import { useStore } from "../store";
+import CoverTrajectory from "./CoverTrajectory";
 import type { DecisionBrief } from "../lib/types";
 
 /** print-only rendition — hidden on screen, the ONLY thing visible on print */
@@ -48,6 +49,12 @@ function BriefPrint({ brief }: { brief: DecisionBrief }) {
           </tr>
         </tbody>
       </table>
+      <div className="bp-cover-wrap">
+        <CoverTrajectory brief={brief} mode="print" />
+        <div className="bp-note">Days of cover over the event window: no-action decline
+          (Oracle, dashed, with P10 band) vs the recommended plan (SPR releases +
+          reroutes arriving at ETA). Mitigation capped at the draw rate.</div>
+      </div>
       {econ && (
         <p className="bp-econ">
           <b>Economic exposure:</b> unmitigated cost of inaction ≈
@@ -187,6 +194,12 @@ export default function BriefCard() {
               {econ.fx_source === "fred_dexinus" ? " LIVE" : " SEED"}</span>
           </div>
         )}
+
+        <div className="cover-wrap"
+          title="derived from Oracle draw rate, Custodian daily releases, and Navigator allocations at weather-adjusted ETAs — mitigation capped at the draw rate">
+          <div className="cover-head">DAYS OF COVER — no action vs recommended plan</div>
+          <CoverTrajectory brief={brief} mode="screen" />
+        </div>
 
         <pre className="brief-narrative">{brief.narrative}</pre>
 

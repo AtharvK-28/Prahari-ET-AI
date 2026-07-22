@@ -193,6 +193,7 @@ class BriefStatus(str, Enum):
 class DecisionBrief(BaseModel):
     brief_id: str = Field(default_factory=new_id)
     created_at: float = Field(default_factory=now_ts)
+    decided_at: Optional[float] = None
     status: BriefStatus = BriefStatus.pending
     trigger: dict[str, Any]                 # corridor, cdp, top signals
     scenario: ScenarioImpact

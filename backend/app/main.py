@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .agents import supervisor
 from .api.routes import router, _loop_lock
 from .api.ws import MANAGER
+from .cognition import history
 from .cognition.cdp import ENGINE
 from .config import get_settings
 from .ingestion import ais, brent, fred, gdelt, marine, ofac
@@ -31,6 +32,7 @@ async def watcher() -> None:
         await MANAGER.broadcast({"event": "signal", "signal": sig.model_dump()})
         for cid in touched:
             state = ENGINE.state(cid)
+            history.record_cdp(cid, state.cdp)
             await MANAGER.broadcast({"event": "cdp_update", "state": state.model_dump()})
             # auto-trigger on threshold crossing — but never re-enter a running loop,
             # and never auto-run on demo signals (the trigger endpoint drives those)
@@ -45,6 +47,15 @@ async def _auto_loop(corridor_id: str) -> None:
         await supervisor.run_loop(corridor_id, MANAGER.broadcast)
 
 
+async def sampler() -> None:
+    """Chronology heartbeat: CDP decay + Brent tick, even between signals."""
+    while True:
+        for st in ENGINE.all_states():
+            history.record_cdp(st.corridor_id, st.cdp)
+        history.record_brent(brent.PRICE.brent_usd)
+        await asyncio.sleep(45)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     s = get_settings()
@@ -57,6 +68,7 @@ async def lifespan(app: FastAPI):
     tasks.append(asyncio.create_task(marine.run()))
     tasks.append(asyncio.create_task(fred.load_history()))
     tasks.append(asyncio.create_task(fred.load_fx()))
+    tasks.append(asyncio.create_task(sampler()))
     log.info("PRAHARI up — feeds: gdelt=%s ais=%s eia=%s llm=%s",
              s.gdelt_enabled, s.ais_live, s.eia_live, s.llm_available)
     yield

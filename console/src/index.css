@@ -426,3 +426,36 @@ h4 { font-size: 10.5px; font-weight: 700; margin: 10px 0 5px; color: var(--text-
 .btn-reset { width: 100%; margin-top: 6px; border: 1px dashed var(--line); color: var(--text-dim); padding: 6px; border-radius: 6px; font-size: 10px; font-family: var(--mono); letter-spacing: .04em; }
 .btn-reset:hover { color: var(--text); border-color: var(--text-dim); }
 .btn-reset:disabled { opacity: .5; }
+
+/* ------------------------------------------------------- chronology strip */
+.chrono { position: absolute; left: 12px; right: 406px; bottom: 44px; z-index: 5; background: rgba(8, 17, 32, .88); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 4px; backdrop-filter: blur(6px); }
+.chrono-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.chrono-title { font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .1em; color: var(--text-dim); }
+.chrono-windows { display: flex; gap: 4px; }
+.chrono-win { font-family: var(--mono); font-size: 9px; color: var(--text-dim); border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; }
+.chrono-win-on { color: var(--accent); border-color: var(--accent-dim); }
+.chrono-svg { display: block; }
+.chrono-pill { position: absolute; left: 12px; bottom: 44px; z-index: 5; font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .08em; color: var(--text-dim); background: rgba(8, 17, 32, .88); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; }
+.chrono-pill:hover { color: var(--text); }
+
+/* -------------------------------------------------------- decision ledger */
+.ledger-card { overflow-x: hidden; }
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+.ledger-table th { text-align: left; font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; color: var(--text-dim); padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.ledger-table td { padding: 4px 6px; border-bottom: 1px dashed rgba(255, 255, 255, .05); }
+.ledger-corridor { max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ledger-chip { font-family: var(--mono); font-size: 8.5px; font-weight: 800; letter-spacing: .05em; border-radius: 3px; padding: 1px 5px; }
+.ledger-approved { color: #6ee7a0; border: 1px solid #14532d; }
+.ledger-dismissed { color: #fca5a5; border: 1px solid #7f1d1d; }
+.ledger-pending { color: #f2c94c; border: 1px solid #4d3a10; }
+.ledger-when { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
+.ledger-hash { color: var(--text-dim); cursor: help; }
+
+/* ------------------------------------------------------- cover trajectory */
+.cover-wrap { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px 4px; margin-bottom: 10px; }
+.cover-head { font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .08em; color: var(--text-dim); margin-bottom: 4px; }
+.cover-chart { width: 100%; height: auto; display: block; }
+@media print {
+  .bp-cover-wrap { margin: 10px 0 0; }
+  .bp-cover { width: 100%; height: auto; display: block; border: 1px solid #ccc; }
+}

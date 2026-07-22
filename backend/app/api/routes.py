@@ -125,6 +125,30 @@ def recent_signals(limit: int = 40) -> dict:
     return {"signals": [s.model_dump() for s in items[-limit:]]}
 
 
+@router.get("/history")
+def history_snapshot(minutes: float = 60) -> dict:
+    """Chronology strip: CDP curves + Brent ticks + signal/brief event markers."""
+    from ..cognition import history
+    import time as _t
+    cutoff = _t.time() - minutes * 60
+    snap = history.snapshot(minutes)
+    snap["signals"] = [
+        {"ts": s.ts, "type": s.type.value, "mode": s.mode.value,
+         "magnitude": s.magnitude, "corridor_ids": s.corridor_ids,
+         "summary": s.summary}
+        for s in list(BUS.history)
+        if s.type != SignalType.vessel_position and s.ts >= cutoff]
+    snap["briefs"] = [
+        {"brief_id": b.brief_id, "created_at": b.created_at,
+         "decided_at": b.decided_at, "status": b.status.value,
+         "corridor": b.trigger.get("corridor"),
+         "corridor_name": b.trigger.get("corridor_name"),
+         "cdp": b.trigger.get("cdp")}
+        for b in supervisor.BRIEFS.values() if b.created_at >= cutoff]
+    snap["threshold"] = ENGINE.threshold
+    return snap
+
+
 # ----------------------------------------------------------------- scenario
 @router.post("/scenario/run")
 def scenario_run(req: ScenarioRequest) -> dict:
@@ -278,6 +302,30 @@ def weather() -> dict:
     return {"corridors": WEATHER}
 
 
+@router.get("/ledger")
+def ledger() -> dict:
+    """Decision ledger: every brief + decision this session, hash-chained.
+
+    chain: sha256(prev_hash + payload) per audit line; verify re-walks the
+    file, so any edit or deletion is detectable (NFR7 governance surface).
+    """
+    entries = sorted(supervisor.BRIEFS.values(), key=lambda b: b.created_at)
+    return {
+        "entries": [{
+            "brief_id": b.brief_id, "created_at": b.created_at,
+            "decided_at": b.decided_at, "status": b.status.value,
+            "corridor_name": b.trigger.get("corridor_name"),
+            "cdp": b.trigger.get("cdp"), "band": b.trigger.get("band"),
+            "elapsed_s": b.elapsed_s,
+            "orchestrator": b.audit.get("orchestrator"),
+            "narrative_source": b.narrative_source,
+            "hash": b.audit.get("hash"),
+            "decision_hash": b.audit.get("decision_hash"),
+        } for b in entries],
+        "chain": supervisor.verify_chain(),
+    }
+
+
 # ------------------------------------------------------------------ rehearsal
 @router.post("/demo/reset")
 async def demo_reset() -> dict:
@@ -289,8 +337,10 @@ async def demo_reset() -> dict:
     """
     if _loop_lock.locked():
         raise HTTPException(409, "a loop is running — wait for it to finish")
+    from ..cognition import history
     ENGINE.reset()
     BUS.history.clear()
+    history.clear()
     reset_demo()
     await MANAGER.broadcast({"event": "board_reset"})
     for st in ENGINE.all_states():

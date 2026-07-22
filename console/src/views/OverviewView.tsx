@@ -1,4 +1,5 @@
 // PRAHARI — Strategic Overview: full-bleed map twin + CDP hero + corridor board
+import ChronologyStrip from "../components/ChronologyStrip";
 import MapTwin from "../components/MapTwin";
 import RiskPanel from "../components/RiskPanel";
 import { useStore } from "../store";
@@ -43,6 +44,7 @@ export default function OverviewView() {
     <div className="view view-overview">
       <div className="overview-map">
         <MapTwin />
+        <ChronologyStrip />
       </div>
       <div className="overview-rail">
         <CdpHero />

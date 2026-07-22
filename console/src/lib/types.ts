@@ -114,9 +114,40 @@ export interface SPRSchedule {
   computed_in_ms: number;
 }
 
+export interface HistorySnapshot {
+  corridors: Record<string, [number, number][]>;   // [ts, cdp]
+  brent: [number, number][];                        // [ts, usd]
+  signals: Array<{ ts: number; type: string; mode: string; magnitude: number;
+                   corridor_ids: string[]; summary: string }>;
+  briefs: Array<{ brief_id: string; created_at: number; decided_at: number | null;
+                  status: string; corridor: string; corridor_name: string; cdp: number }>;
+  threshold: number;
+}
+
+export interface LedgerEntry {
+  brief_id: string;
+  created_at: number;
+  decided_at: number | null;
+  status: "pending" | "approved" | "dismissed";
+  corridor_name: string;
+  cdp: number;
+  band: string;
+  elapsed_s: number;
+  orchestrator: string | null;
+  narrative_source: string;
+  hash: string | null;
+  decision_hash: string | null;
+}
+
+export interface LedgerResponse {
+  entries: LedgerEntry[];
+  chain: { entries: number; checked: number; intact: boolean };
+}
+
 export interface DecisionBrief {
   brief_id: string;
   created_at: number;
+  decided_at?: number | null;
   status: "pending" | "approved" | "dismissed";
   trigger: {
     corridor: string;
@@ -134,6 +165,7 @@ export interface DecisionBrief {
   economics?: {
     inr_per_usd: number;
     fx_source: string;
+    consumption_kbd?: number;
     cost_of_inaction_usd_mn_day: number;
     cost_of_inaction_inr_crore_day: number;
     plan_premium_usd_mn_day: number;
