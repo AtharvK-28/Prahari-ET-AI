@@ -36,6 +36,7 @@ interface PrahariState {
   weather: Record<string, CorridorWeather>;
   voiceEnabled: boolean;
   replaying: boolean;
+  manualLoop: boolean;   // modal auto-opens only for user-fired loops
 
   boot: () => Promise<void>;
   select: (id: string | null) => void;
@@ -85,6 +86,7 @@ export const useStore = create<PrahariState>((set, get) => ({
   weather: {},
   voiceEnabled: false,
   replaying: false,
+  manualLoop: false,
 
   boot: async () => {
     const [status, twin, corridorsRes, recent] = await Promise.all([
@@ -126,7 +128,8 @@ export const useStore = create<PrahariState>((set, get) => ({
   setSpr: (spr) => set({ spr }),
 
   fireTrigger: async () => {
-    set({ loopRunning: true, loopStarted: Date.now(), loopElapsed: 0, stages: [], brief: null, briefOpen: false });
+    set({ loopRunning: true, loopStarted: Date.now(), loopElapsed: 0, stages: [],
+          brief: null, briefOpen: false, manualLoop: true });
     try {
       await api.trigger();
     } catch {
@@ -204,7 +207,10 @@ function connectWS(set: any, get: any) {
         break;
       }
       case "brief_ready": {
-        set({ brief: msg.brief, briefOpen: true, loopRunning: false });
+        // auto-triggered loops announce quietly (BRIEF button + voice);
+        // only a user-fired trigger pops the modal
+        set({ brief: msg.brief, briefOpen: get().manualLoop,
+              loopRunning: false, manualLoop: false });
         if (get().voiceEnabled) {
           const b = msg.brief;
           const s = b.scenario;
