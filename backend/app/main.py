@@ -29,6 +29,7 @@ async def watcher() -> None:
         if sig.type == SignalType.vessel_position:
             continue
         touched = ENGINE.ingest(sig)
+        history.record_signal(sig)
         await MANAGER.broadcast({"event": "signal", "signal": sig.model_dump()})
         for cid in touched:
             state = ENGINE.state(cid)

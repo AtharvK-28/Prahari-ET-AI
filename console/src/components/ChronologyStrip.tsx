@@ -40,8 +40,10 @@ export default function ChronologyStrip() {
   const brief = useStore((s) => s.brief);
 
   useEffect(() => {
+    // clientWidth includes the panel's 20px horizontal padding — subtract it,
+    // or right-edge labels and the last time tick get clipped at the border
     const measure = () =>
-      setWidth(Math.max(360, wrapRef.current?.clientWidth ?? 800));
+      setWidth(Math.max(360, (wrapRef.current?.clientWidth ?? 820) - 20));
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
@@ -125,7 +127,7 @@ export default function ChronologyStrip() {
             <g key={c.cid}>
               <path d={line(c.pts, yCdp)} fill="none" stroke={colorOf(c.cid)}
                 strokeWidth={1.6} opacity={0.92} />
-              <text x={width - 4}
+              <text x={width - 4} className="chrono-label"
                 y={labelY.find((l) => l.cid === c.cid)!.y}
                 fill={colorOf(c.cid)} fontSize={8.5}
                 fontFamily="var(--mono)" textAnchor="end" opacity={0.95}>

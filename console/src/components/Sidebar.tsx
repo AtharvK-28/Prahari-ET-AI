@@ -74,7 +74,7 @@ export default function Sidebar() {
         </button>
         <div className="replay-note">Hormuz + Bab el-Mandeb cut at once · compound crisis, solved live</div>
         <button className="btn-reset" onClick={resetBoard} disabled={loopRunning}
-          title="forget accumulated signal influence (demo bursts, replays, decayed news) for a calm rehearsal board — live feeds keep running, so genuinely hot real news will re-elevate corridors within minutes">
+          title="forget accumulated signal influence (demo bursts, replays, decayed news) for a calm rehearsal board — live feeds keep running, and the chronology keeps its record: resets show as cliffs, history is never rewritten">
           ↺ RESET BOARD
         </button>
       </div>

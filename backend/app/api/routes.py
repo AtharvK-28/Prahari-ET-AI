@@ -127,17 +127,15 @@ def recent_signals(limit: int = 40) -> dict:
 
 @router.get("/history")
 def history_snapshot(minutes: float = 60) -> dict:
-    """Chronology strip: CDP curves + Brent ticks + signal/brief event markers."""
+    """Chronology strip: CDP curves + Brent ticks + signal/brief event markers.
+
+    Reads the chronicle (cognition.history), which a board reset does NOT
+    clear — resets appear as cliffs in the curves, never as rewritten history.
+    """
     from ..cognition import history
     import time as _t
     cutoff = _t.time() - minutes * 60
     snap = history.snapshot(minutes)
-    snap["signals"] = [
-        {"ts": s.ts, "type": s.type.value, "mode": s.mode.value,
-         "magnitude": s.magnitude, "corridor_ids": s.corridor_ids,
-         "summary": s.summary}
-        for s in list(BUS.history)
-        if s.type != SignalType.vessel_position and s.ts >= cutoff]
     snap["briefs"] = [
         {"brief_id": b.brief_id, "created_at": b.created_at,
          "decided_at": b.decided_at, "status": b.status.value,
@@ -337,13 +335,13 @@ async def demo_reset() -> dict:
     """
     if _loop_lock.locked():
         raise HTTPException(409, "a loop is running — wait for it to finish")
-    from ..cognition import history
     ENGINE.reset()
-    BUS.history.clear()
-    history.clear()
+    BUS.history.clear()          # chronology keeps its record — resets show as cliffs
     reset_demo()
+    from ..cognition import history
     await MANAGER.broadcast({"event": "board_reset"})
     for st in ENGINE.all_states():
+        history.record_cdp(st.corridor_id, st.cdp)   # the cliff's bottom edge
         await MANAGER.broadcast({"event": "cdp_update", "state": st.model_dump()})
     return {"reset": True, "brent_usd": PRICE.brent_usd, "brent_source": PRICE.source}
 
