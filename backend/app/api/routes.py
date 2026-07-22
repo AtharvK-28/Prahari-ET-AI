@@ -23,6 +23,16 @@ router = APIRouter()
 _loop_lock = asyncio.Lock()     # one supervisor loop at a time
 
 
+def _fred_status() -> str:
+    from ..ingestion import fred
+    return f"loaded ({fred.CALIBRATION.get('episodes')} shocks)" if fred.CALIBRATION else "off"
+
+
+def _marine_status() -> str:
+    from ..ingestion.marine import WEATHER
+    return f"live ({len(WEATHER)} corridors)" if WEATHER else "warming up"
+
+
 # ------------------------------------------------------------------ sensing
 @router.get("/status")
 def status() -> dict:
@@ -36,6 +46,8 @@ def status() -> dict:
             "ais": "live" if s.ais_live else "off (no key)",
             "eia": "live" if s.eia_live else "seed baseline (no key)",
             "ofac": "live",
+            "fred": _fred_status(),
+            "marine": _marine_status(),
             "llm": "anthropic" if s.llm_available else "template narrative (no key)",
         },
         "alert_threshold": ENGINE.threshold,
@@ -164,6 +176,21 @@ def approve(brief_id: str, payload: dict | None = None) -> dict:
         raise HTTPException(404, "unknown brief")
     approve_flag = (payload or {}).get("approve", True)
     return supervisor.decide(brief_id, approve_flag).model_dump()
+
+
+# -------------------------------------------------------- calibration/weather
+@router.get("/calibration/shocks")
+def calibration_shocks() -> dict:
+    """Historical Brent shock episodes (FRED) grounding the Oracle's outputs."""
+    from ..ingestion import fred
+    return {"calibration": fred.CALIBRATION, "shocks": fred.SHOCKS[-15:]}
+
+
+@router.get("/weather")
+def weather() -> dict:
+    """Live corridor sea state (Open-Meteo Marine) + delay factors."""
+    from ..ingestion.marine import WEATHER
+    return {"corridors": WEATHER}
 
 
 # -------------------------------------------------------------------- replay

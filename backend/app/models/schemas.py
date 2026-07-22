@@ -135,6 +135,8 @@ class Alternative(BaseModel):
     yield_penalty: float
     supplier_reliability: float = 0.8
     reliability_source: str = "seed"     # seed | eia_derived
+    weather_delay_factor: float = 1.0    # Open-Meteo Marine sea-state multiplier
+    max_wave_m: Optional[float] = None
     score: float
     feasible: bool
     exclusion_reason: Optional[str] = None

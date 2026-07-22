@@ -10,6 +10,7 @@ import time
 
 from ..cognition.cdp import ENGINE
 from ..config import model_config, seed_data
+from ..ingestion import marine
 from ..ingestion.brent import PRICE
 from ..knowledge.graph import KG
 from ..models.schemas import Alternative, ProcurementPlan, ProcurementRequest
@@ -42,17 +43,22 @@ def optimize(req: ProcurementRequest) -> ProcurementPlan:
         # reliability: EIA-derived flow-stability proxy where available, seed otherwise
         reliability = float(supplier.get("reliability", 0.8))
         rel_weight = float(cfg.get("reliability_weight_usd", 2.0))
-        score = landed + lam * risk * float(alt["eta_days"]) + rel_weight * (1 - reliability)
+        # live sea state (Open-Meteo Marine): heavy seas stretch the ETA
+        weather = marine.corridor_delay(alt["corridor"])
+        eta = float(alt["eta_days"]) * weather["delay_factor"]
+        score = landed + lam * risk * eta + rel_weight * (1 - reliability)
 
         a = Alternative(
             id=alt["id"], supplier=supplier["name"], grade=KG.node(alt["grade"])["name"],
             grade_category=category, corridor=alt["corridor"], corridor_name=corridor["name"],
             allocated_kbd=0.0, landed_cost_usd=round(landed, 2),
             landed_premium_usd=float(alt["landed_premium_usd"]),
-            eta_days=float(alt["eta_days"]), corridor_risk=round(risk, 3),
+            eta_days=round(eta, 1), corridor_risk=round(risk, 3),
             grade_fit=penalty <= tolerance, yield_penalty=penalty,
             supplier_reliability=round(reliability, 2),
             reliability_source=supplier.get("reliability_source", "seed"),
+            weather_delay_factor=weather["delay_factor"],
+            max_wave_m=weather.get("max_wave_m"),
             score=round(score, 2), feasible=True)
 
         # hard constraints (FR8) — excluded WITH the reason

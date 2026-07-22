@@ -7,3 +7,7 @@ httpx>=0.27
 websockets>=13.0
 networkx>=3.3
 anthropic>=0.40
+langgraph>=0.2
+pandas>=2.2          # PPAC/EIA ETL scripts
+openpyxl>=3.1
+xlrd>=2.0

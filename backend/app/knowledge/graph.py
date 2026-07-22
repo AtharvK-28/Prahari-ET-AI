@@ -34,7 +34,9 @@ class KnowledgeGraph:
                 self.g.add_edge(c["id"], cp, rel="PASSES_THROUGH")
             for p in c["ports"]:
                 self.g.add_edge(c["id"], p, rel="LANDS_AT")
-        derived = self._load_derived_eia()
+        derived = self._load_derived_yaml("derived_eia.yaml")
+        sanctions = self._load_derived_yaml("derived_sanctions.yaml")
+        exposure_rank = {"none": 0, "low": 1, "medium": 2, "high": 3}
         for sup in s["suppliers"]:
             self.g.add_node(sup["id"], kind="supplier", **sup)
             d = derived.get(sup["id"])
@@ -46,6 +48,16 @@ class KnowledgeGraph:
                 if d.get("reliability_proxy") is not None:
                     self.g.nodes[sup["id"]]["reliability"] = d["reliability_proxy"]
                     self.g.nodes[sup["id"]]["reliability_source"] = "eia_derived"
+            sd = sanctions.get(sup["id"])
+            if sd:
+                # OpenSanctions covers a partial list — merge conservatively:
+                # effective exposure = max(seed judgment, data-derived level)
+                node = self.g.nodes[sup["id"]]
+                node["sanctions_data"] = sd
+                seed_lvl = exposure_rank.get(str(sup.get("sanction_exposure", "none")), 0)
+                data_lvl = exposure_rank.get(sd.get("sanction_exposure", "none"), 0)
+                node["sanction_exposure"] = [k for k, v in exposure_rank.items()
+                                             if v == max(seed_lvl, data_lvl)][0]
             for gid in sup["grades"]:
                 self.g.add_edge(sup["id"], gid, rel="PRODUCES")
             for cid in sup["corridors"]:
@@ -61,12 +73,12 @@ class KnowledgeGraph:
             self.g.add_node(site["id"], kind="spr", **site)
 
     @staticmethod
-    def _load_derived_eia() -> dict[str, dict]:
-        """Optional config/derived_eia.yaml written by scripts/eia_etl.py."""
+    def _load_derived_yaml(name: str) -> dict[str, dict]:
+        """Optional config/<name> written by scripts/*_etl.py."""
         import yaml
 
         from ..config import CONFIG_DIR
-        path = CONFIG_DIR / "derived_eia.yaml"
+        path = CONFIG_DIR / name
         if not path.exists():
             return {}
         with open(path, encoding="utf-8") as f:

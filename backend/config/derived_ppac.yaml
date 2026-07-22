@@ -1,0 +1,13 @@
+meta:
+  source: PPAC official workbooks (data/PPAC/)
+  generated: 2026-07-22 17:25
+  bbl_per_tonne: 7.33
+  note: These figures VERIFY the seed_data.yaml national block.
+crude_imports:
+  fy2025_26_mmt: 245.8
+  fy2025_26_kbd: 4936.0
+  fy2026_27_annualised_mmt: 241.9
+  fy2026_27_months_reported: 3
+derived:
+  implied_consumption_kbd: 5486.0
+  implied_import_dependency_pct: 90.0

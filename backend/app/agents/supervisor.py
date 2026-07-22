@@ -39,56 +39,38 @@ def _chokepoint_for(corridor_id: str) -> str:
     return _CHOKEPOINT_OF_CORRIDOR.get(corridor_id, "hormuz")
 
 
+try:
+    from . import graph_supervisor
+    _HAS_LANGGRAPH = True
+except ImportError:                    # demo safety: deterministic fallback (NFR4)
+    _HAS_LANGGRAPH = False
+
+
 async def run_loop(corridor_id: str, emit: Emit, cut_pct: float = 50.0,
                    duration_days: int = 30) -> DecisionBrief:
-    """The full Sentinel->Oracle->Navigator->Custodian->brief chain, timed."""
+    """The full Sentinel->Oracle->Navigator->Custodian->brief chain, timed.
+
+    Primary path: LangGraph StateGraph (agents/graph_supervisor.py).
+    Fallback: the equivalent deterministic sequential chain below.
+    """
     t0 = time.perf_counter()
-    state = ENGINE.state(corridor_id)
-    trigger = {
-        "corridor": corridor_id, "corridor_name": state.name, "cdp": state.cdp,
-        "band": state.band, "lead_time_hours": state.lead_time_hours,
-        "top_factors": [f.model_dump() for f in state.factors[:3]],
-    }
-    await emit({"event": "loop_started", "trigger": trigger, "t": 0.0})
-
-    # ---- Oracle
     chokepoint = _chokepoint_for(corridor_id)
-    scen_req = ScenarioRequest(kind="chokepoint_cut", chokepoint=chokepoint,
-                               cut_pct=cut_pct, duration_days=duration_days)
-    await emit({"event": "stage", "stage": "oracle", "status": "running",
-                "t": round(time.perf_counter() - t0, 1)})
-    impact = await asyncio.to_thread(oracle.run_scenario, scen_req)
-    await emit({"event": "stage", "stage": "oracle", "status": "done",
-                "t": round(time.perf_counter() - t0, 1),
-                "impact": impact.model_dump()})
 
-    # ---- Navigator: target the refinery with the largest absolute supply loss
-    worst = max(impact.refineries, key=lambda r: r.supply_loss_kbd, default=None)
-    gap = max(worst.supply_loss_kbd if worst else 0.0, 100.0)
-    proc_req = ProcurementRequest(refinery_id=worst.id if worst else "jamnagar", gap_kbd=gap)
-    await emit({"event": "stage", "stage": "navigator", "status": "running",
-                "t": round(time.perf_counter() - t0, 1)})
-    plan = await asyncio.to_thread(navigator.optimize, proc_req)
-    await emit({"event": "stage", "stage": "navigator", "status": "done",
-                "t": round(time.perf_counter() - t0, 1), "plan": plan.model_dump()})
+    if _HAS_LANGGRAPH:
+        brief, scen_req = await graph_supervisor.run(
+            corridor_id, emit, cut_pct, duration_days, chokepoint)
+    else:
+        brief, scen_req = await _run_sequential(
+            corridor_id, emit, cut_pct, duration_days, chokepoint, t0)
 
-    # ---- Custodian: bridge the national supply loss until reroutes land
-    spr_req = SPRRequest(gap_kbd=impact.supply_loss_kbd * 0.5, duration_days=duration_days)
-    await emit({"event": "stage", "stage": "custodian", "status": "running",
-                "t": round(time.perf_counter() - t0, 1)})
-    schedule = await asyncio.to_thread(custodian.plan, spr_req)
-    await emit({"event": "stage", "stage": "custodian", "status": "done",
-                "t": round(time.perf_counter() - t0, 1),
-                "spr": schedule.model_dump()})
-
-    # ---- Compose brief
-    await emit({"event": "stage", "stage": "brief", "status": "running",
-                "t": round(time.perf_counter() - t0, 1)})
-    brief = DecisionBrief(trigger=trigger, scenario=impact, procurement=plan, spr=schedule)
+    impact, plan, schedule, trigger = (brief.scenario, brief.procurement,
+                                       brief.spr, brief.trigger)
     brief.narrative, brief.narrative_source = await _narrate(brief)
     brief.elapsed_s = round(time.perf_counter() - t0, 1)
     brief.audit = {   # NFR7
-        "model_version": MODEL_VERSION, "inputs": trigger,
+        "model_version": MODEL_VERSION,
+        "orchestrator": "langgraph" if _HAS_LANGGRAPH else "sequential",
+        "inputs": trigger,
         "scenario_request": scen_req.model_dump(), "assumptions": impact.assumptions,
         "navigator_params": plan.params, "created_at": now_ts(),
     }
@@ -98,6 +80,49 @@ async def run_loop(corridor_id: str, emit: Emit, cut_pct: float = 50.0,
                 "brief": brief.model_dump()})
     log.info("loop complete in %.1fs -> brief %s", brief.elapsed_s, brief.brief_id)
     return brief
+
+
+async def _run_sequential(corridor_id: str, emit: Emit, cut_pct: float,
+                          duration_days: int, chokepoint: str,
+                          t0: float) -> tuple[DecisionBrief, ScenarioRequest]:
+    """Deterministic fallback chain — behaviourally identical to the graph."""
+    state = ENGINE.state(corridor_id)
+    trigger = {
+        "corridor": corridor_id, "corridor_name": state.name, "cdp": state.cdp,
+        "band": state.band, "lead_time_hours": state.lead_time_hours,
+        "top_factors": [f.model_dump() for f in state.factors[:3]],
+    }
+    await emit({"event": "loop_started", "trigger": trigger, "t": 0.0})
+
+    scen_req = ScenarioRequest(kind="chokepoint_cut", chokepoint=chokepoint,
+                               cut_pct=cut_pct, duration_days=duration_days)
+    await emit({"event": "stage", "stage": "oracle", "status": "running",
+                "t": round(time.perf_counter() - t0, 1)})
+    impact = await asyncio.to_thread(oracle.run_scenario, scen_req)
+    await emit({"event": "stage", "stage": "oracle", "status": "done",
+                "t": round(time.perf_counter() - t0, 1), "impact": impact.model_dump()})
+
+    worst = max(impact.refineries, key=lambda r: r.supply_loss_kbd, default=None)
+    gap = max(worst.supply_loss_kbd if worst else 0.0, 100.0)
+    await emit({"event": "stage", "stage": "navigator", "status": "running",
+                "t": round(time.perf_counter() - t0, 1)})
+    plan = await asyncio.to_thread(navigator.optimize, ProcurementRequest(
+        refinery_id=worst.id if worst else "jamnagar", gap_kbd=gap))
+    await emit({"event": "stage", "stage": "navigator", "status": "done",
+                "t": round(time.perf_counter() - t0, 1), "plan": plan.model_dump()})
+
+    await emit({"event": "stage", "stage": "custodian", "status": "running",
+                "t": round(time.perf_counter() - t0, 1)})
+    schedule = await asyncio.to_thread(custodian.plan, SPRRequest(
+        gap_kbd=impact.supply_loss_kbd * 0.5, duration_days=duration_days))
+    await emit({"event": "stage", "stage": "custodian", "status": "done",
+                "t": round(time.perf_counter() - t0, 1), "spr": schedule.model_dump()})
+
+    await emit({"event": "stage", "stage": "brief", "status": "running",
+                "t": round(time.perf_counter() - t0, 1)})
+    brief = DecisionBrief(trigger=trigger, scenario=impact,
+                          procurement=plan, spr=schedule)
+    return brief, scen_req
 
 
 # ---------------------------------------------------------------- narrative

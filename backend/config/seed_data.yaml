@@ -14,9 +14,9 @@ meta:
 # National context (Oracle parameters)
 # ---------------------------------------------------------------------------
 national:
-  crude_consumption_kbd: 5450        # ~5.45 Mbpd  (to-verify vs PPAC)
-  import_dependency_pct: 88
-  import_volume_kbd: 4800            # ~4.8 Mbpd imported
+  crude_consumption_kbd: 5486        # PPAC-VERIFIED: imports 4936 kbd + ~550 kbd domestic prod
+  import_dependency_pct: 90          # PPAC-VERIFIED (crude basis, FY25-26); 88% often quoted on product basis
+  import_volume_kbd: 4936            # PPAC-VERIFIED: FY25-26 = 245.8 MMT (see config/derived_ppac.yaml)
   hormuz_transit_share_pct: 42       # 40-45% per problem brief
   commercial_stock_days: 12          # refiner working inventory (to-verify)
   gdp_usd_bn: 4300                   # FY26 nominal (to-verify)

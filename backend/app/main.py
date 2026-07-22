@@ -13,7 +13,7 @@ from .api.routes import router, _loop_lock
 from .api.ws import MANAGER
 from .cognition.cdp import ENGINE
 from .config import get_settings
-from .ingestion import ais, brent, gdelt, ofac
+from .ingestion import ais, brent, fred, gdelt, marine, ofac
 from .ingestion.bus import BUS
 from .models.schemas import SignalType
 
@@ -54,6 +54,8 @@ async def lifespan(app: FastAPI):
     tasks.append(asyncio.create_task(brent.run()))
     tasks.append(asyncio.create_task(ais.run()))
     tasks.append(asyncio.create_task(ofac.run()))
+    tasks.append(asyncio.create_task(marine.run()))
+    tasks.append(asyncio.create_task(fred.load_history()))
     log.info("PRAHARI up — feeds: gdelt=%s ais=%s eia=%s llm=%s",
              s.gdelt_enabled, s.ais_live, s.eia_live, s.llm_available)
     yield

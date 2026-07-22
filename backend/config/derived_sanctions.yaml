@@ -1,0 +1,82 @@
+meta:
+  source: OpenSanctions targets.simple.csv (data/OpenSanctions/)
+  generated: 2026-07-22 17:27
+  rows_scanned: 711
+  energy_shipping_matches: 27
+  levels: high>=100, medium>=20, low>=1 sanctioned energy/shipping entities
+suppliers:
+  adnoc:
+    country_code: ae
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  angola_son:
+    country_code: ao
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  colombia_eco:
+    country_code: co
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  guyana_exxon:
+    country_code: gy
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  iraq_somo:
+    country_code: iq
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  kazakh:
+    country_code: kz
+    sanctioned_energy_entities: 1
+    sanctioned_vessels: 0
+    sanction_exposure: low
+  kpc:
+    country_code: kw
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  mexico_pemex:
+    country_code: mx
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  nigeria_nnpc:
+    country_code: ng
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  omoc:
+    country_code: om
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  petrobras:
+    country_code: br
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  qatar_en:
+    country_code: qa
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  russia:
+    country_code: ru
+    sanctioned_energy_entities: 24
+    sanctioned_vessels: 0
+    sanction_exposure: medium
+  saudi_aramco:
+    country_code: sa
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
+  us_exports:
+    country_code: us
+    sanctioned_energy_entities: 0
+    sanctioned_vessels: 0
+    sanction_exposure: none
