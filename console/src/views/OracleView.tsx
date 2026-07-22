@@ -1,10 +1,42 @@
 // PRAHARI — Simulation (Oracle): shock injector + telemetry + terminal narrative
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useStore } from "../store";
 import ImpactView from "../components/ImpactView";
 import ShockCalibration from "../components/ShockCalibration";
 import SupplySankey from "../components/SupplySankey";
+
+/** live sea state along each corridor (Open-Meteo Marine) — feeds Navigator ETAs */
+function SeaStateBoard() {
+  const weather = useStore((s) => s.weather);
+  const corridors = useStore((s) => s.corridors);
+  const rows = Object.entries(weather)
+    .map(([cid, w]) => ({ cid, name: corridors[cid]?.name ?? cid, ...w }))
+    .sort((a, b) => b.max_wave_m - a.max_wave_m)
+    .slice(0, 7);
+  return (
+    <div className="intel-card">
+      <div className="intel-head">
+        <span>🌊 SEA STATE — VOYAGE REALISM</span>
+        <span className="badge badge-live">OPEN-METEO</span>
+      </div>
+      {rows.length === 0 ? (
+        <div className="intel-empty">marine feed warming up…</div>
+      ) : (
+        rows.map((r) => (
+          <div key={r.cid} className="sea-row" title={r.name}>
+            <span className="sea-name">{r.name}</span>
+            <span className="sea-wave mono">{r.max_wave_m.toFixed(1)} m</span>
+            <span className={`sea-delay mono ${r.delay_factor > 1 ? "sea-delay-hot" : ""}`}>
+              {r.delay_factor > 1 ? `ETA ×${r.delay_factor.toFixed(2)}` : "on time"}
+            </span>
+          </div>
+        ))
+      )}
+      <div className="detail-note">wave height → ETA delay factor, applied inside the Navigator's ranking</div>
+    </div>
+  );
+}
 
 export default function OracleView() {
   const scenario = useStore((s) => s.scenario);
@@ -32,6 +64,16 @@ export default function OracleView() {
       setDuration(p.duration_days);
     }
   }, [preset, presets]);
+
+  // ambient posture: run the default what-if on open (pure computation — no
+  // signals are injected), so the page never sits on an empty placeholder
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || scenario || !presets[preset]) return;
+    autoRan.current = true;
+    inject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presets]);
 
   const inject = async () => {
     setBusy(true);
@@ -108,6 +150,7 @@ export default function OracleView() {
         </div>
 
         {scenario && <ShockCalibration currentPct={scenario.brent_delta_pct} />}
+        <SeaStateBoard />
       </div>
 
       <div className="oracle-main">
@@ -133,8 +176,7 @@ export default function OracleView() {
         ) : (
           <div className="oracle-placeholder">
             <div className="oracle-placeholder-mark">☉</div>
-            select a disruption vector and INJECT DISRUPTION —<br />
-            the Oracle propagates it through the knowledge graph in ~100 ms
+            propagating the default vector through the knowledge graph…
           </div>
         )}
         <SupplySankey />

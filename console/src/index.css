@@ -481,3 +481,24 @@ h4 { font-size: 10px; font-weight: 700; margin: 11px 0 6px; color: var(--text-di
 .cover-wrap { background: var(--bg); border: 1px solid var(--line-soft); border-radius: 8px; padding: 9px 11px 5px; margin-bottom: 10px; }
 .cover-head { font-family: var(--mono); font-size: 8.5px; font-weight: 750; letter-spacing: .1em; color: var(--text-dim); margin-bottom: 5px; }
 .cover-chart { width: 100%; height: auto; display: block; }
+
+/* --------------------------------------------------- ambient posture cards */
+.posture-row { display: flex; align-items: center; gap: 9px; padding: 4px 0; font-size: 11px; }
+.posture-name { width: 118px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.posture-bar { flex: 1; height: 4px; background: rgba(255, 255, 255, .05); border-radius: 2px; overflow: hidden; }
+.posture-fill { height: 100%; background: var(--green); opacity: .7; border-radius: 2px; }
+.posture-pct { width: 34px; text-align: right; font-size: 10.5px; color: var(--text-dim); }
+
+.sea-row { display: flex; align-items: center; gap: 9px; padding: 4px 0; font-size: 11px; }
+.sea-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sea-wave { width: 44px; text-align: right; font-size: 10.5px; }
+.sea-delay { width: 68px; text-align: right; font-size: 10px; color: var(--text-dim); }
+.sea-delay-hot { color: var(--elevated); }
+
+.cpw-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 11.5px; border-bottom: 1px solid var(--line-soft); }
+.cpw-row:last-child { border-bottom: none; }
+.cpw-dot { font-size: 8px; }
+.cpw-dot.band-low { color: var(--low); } .cpw-dot.band-elevated { color: var(--elevated); }
+.cpw-dot.band-high { color: var(--high); } .cpw-dot.band-critical { color: var(--critical); }
+.cpw-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cpw-share { color: var(--text-dim); font-size: 10.5px; }

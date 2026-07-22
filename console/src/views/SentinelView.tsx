@@ -9,6 +9,45 @@ function timeAgo(ts: number): string {
   return `${Math.round(s / 3600)}h ago`;
 }
 
+const BAND_RANK = { low: 0, elevated: 1, high: 2, critical: 3 } as const;
+
+/** ambient watch grid: each strait's import share + worst corridor band through it */
+function ChokepointWatch() {
+  const twin = useStore((s) => s.twin);
+  const corridors = useStore((s) => s.corridors);
+  if (!twin) return null;
+  const cps = twin.features.filter((f) => f.properties.kind === "chokepoint");
+  const corridorFeatures = twin.features.filter((f) => f.properties.kind === "corridor");
+  const rows = cps.map((cp) => {
+    const through = corridorFeatures
+      .filter((f) => (f.properties.chokepoints ?? []).includes(cp.properties.id))
+      .map((f) => corridors[f.properties.id])
+      .filter(Boolean);
+    const worst = through.reduce(
+      (a, b) => (BAND_RANK[b!.band] > BAND_RANK[a!.band] ? b : a), through[0]);
+    return { id: cp.properties.id, name: cp.properties.name,
+             share: cp.properties.share_pct, band: worst?.band ?? "low",
+             cdp: worst?.cdp ?? 0 };
+  }).sort((a, b) => b.share - a.share);
+  return (
+    <div className="intel-card">
+      <div className="intel-head">
+        <span>🎯 CHOKEPOINT WATCH</span>
+        <span className="hint">share of India's imports</span>
+      </div>
+      {rows.map((r) => (
+        <div key={r.id} className="cpw-row"
+          title={`worst corridor through ${r.name}: CDP ${r.cdp.toFixed(2)} (${r.band})`}>
+          <span className={`cpw-dot band-${r.band}`}>●</span>
+          <span className="cpw-name">{r.name}</span>
+          <span className="cpw-share mono">{r.share}%</span>
+          <span className={`sb-band band-${r.band}`}>{r.band.toUpperCase()}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SanctionAlerts() {
   const signals = useStore((s) => s.signals);
   const sanctions = signals.filter((s) => s.type === "sanction_update").slice(0, 3);
@@ -137,6 +176,7 @@ export default function SentinelView() {
     <div className="view view-sentinel">
       <div className="sentinel-map"><MapTwin /></div>
       <div className="sentinel-rail">
+        <ChokepointWatch />
         <SanctionAlerts />
         <AisTargets />
         <RiskTelemetry />

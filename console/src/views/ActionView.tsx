@@ -1,9 +1,42 @@
 // PRAHARI — Action Center: Navigator route ranking + Custodian SPR + authorization
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useStore } from "../store";
 import DecisionLedger from "../components/DecisionLedger";
 import type { Alternative } from "../lib/types";
+
+const MMT_TO_MBBL = 7.33;
+
+/** current strategic reserve posture — from the twin's SPR sites */
+function ReservePosture() {
+  const twin = useStore((s) => s.twin);
+  const sites = (twin?.features ?? []).filter((f) => f.properties.kind === "spr");
+  if (!sites.length) return null;
+  const capMbbl = sites.reduce((a, f) => a + f.properties.capacity_mmt * MMT_TO_MBBL, 0);
+  const fillMbbl = sites.reduce(
+    (a, f) => a + f.properties.capacity_mmt * (f.properties.fill_pct / 100) * MMT_TO_MBBL, 0);
+  return (
+    <div className="intel-card">
+      <div className="intel-head">
+        <span>🛢 RESERVE POSTURE</span>
+        <span className="hint">{fillMbbl.toFixed(1)} / {capMbbl.toFixed(1)} Mbbl</span>
+      </div>
+      {sites.map((f) => (
+        <div key={f.properties.id} className="posture-row"
+          title={`${f.properties.name} — ${f.properties.capacity_mmt} MMT capacity, ${f.properties.fill_pct}% filled`}>
+          <span className="posture-name">{f.properties.name}</span>
+          <div className="posture-bar">
+            <div className="posture-fill" style={{ width: `${f.properties.fill_pct}%` }} />
+          </div>
+          <span className="posture-pct mono">{f.properties.fill_pct}%</span>
+        </div>
+      ))}
+      <div className="detail-note">
+        Custodian draws against this inventory — floor is a hard constraint, never breached
+      </div>
+    </div>
+  );
+}
 
 function chip(a: Alternative, rank: number): { label: string; cls: string } {
   if (!a.feasible) return { label: "EXCLUDED", cls: "chip-risk" };
@@ -37,6 +70,16 @@ export default function ActionView() {
       setBusy(false);
     }
   };
+
+  // ambient posture: optimise against current conditions on first open (pure
+  // computation), so the tables never sit empty waiting for a crisis
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || plan || spr) return;
+    autoRan.current = true;
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="view view-action">
@@ -218,6 +261,7 @@ export default function ActionView() {
             )}
           </div>
         )}
+        <ReservePosture />
         <DecisionLedger />
       </div>
     </div>
