@@ -1,0 +1,24 @@
+# python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# secrets
+backend/.env
+
+# runtime artefacts
+backend/data/replay/recorded_*.jsonl
+backend/data/audit_log.jsonl
+backend/data/server.log
+
+# EIA bulk downloads (389 MB — regenerate config/derived_eia.yaml via scripts/eia_etl.py)
+data/
+
+# node
+console/node_modules/
+console/dist/
+
+# editor/os
+.vscode/
+Thumbs.db
+.DS_Store
