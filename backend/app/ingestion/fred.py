@@ -25,6 +25,34 @@ SERIES = "DCOILBRENTEU"
 SHOCKS: list[dict] = []           # populated at startup
 CALIBRATION: dict = {}
 
+# USD→INR for the import-bill ticker. Seed fallback is clearly tagged (NFR3);
+# overwritten by FRED DEXINUS (daily official rate) when the key is present.
+FX: dict = {"inr_per_usd": 88.0, "date": None, "source": "seed_fallback"}
+
+
+async def load_fx() -> None:
+    """Latest INR/USD from FRED (series DEXINUS) — powers the ₹ import bill."""
+    key = os.getenv("FRED_API_KEY", "")
+    if not key:
+        return
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(FRED_URL, params={
+                "series_id": "DEXINUS", "api_key": key, "file_type": "json",
+                "sort_order": "desc", "limit": 10,
+            }, timeout=30)
+            r.raise_for_status()
+            for o in r.json().get("observations", []):
+                try:
+                    FX.update({"inr_per_usd": float(o["value"]),
+                               "date": o["date"], "source": "fred_dexinus"})
+                    log.info("FX loaded: ₹%.2f/USD (%s)", FX["inr_per_usd"], o["date"])
+                    return
+                except ValueError:      # FRED emits "." on market holidays
+                    continue
+    except Exception as e:
+        log.warning("FRED FX load failed: %s — using tagged seed rate", e)
+
 
 async def load_history(years: int = 12) -> None:
     key = os.getenv("FRED_API_KEY", "")

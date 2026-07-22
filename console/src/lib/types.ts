@@ -131,7 +131,17 @@ export interface DecisionBrief {
   spr: SPRSchedule | null;
   narrative: string;
   narrative_source: string;
+  economics?: {
+    inr_per_usd: number;
+    fx_source: string;
+    cost_of_inaction_usd_mn_day: number;
+    cost_of_inaction_inr_crore_day: number;
+    plan_premium_usd_mn_day: number;
+    plan_premium_inr_crore_day: number;
+    note: string;
+  };
   elapsed_s: number;
+  audit?: Record<string, unknown>;
 }
 
 export interface StageEvent {
@@ -140,10 +150,20 @@ export interface StageEvent {
   t: number;
 }
 
+export interface EconomicsTicker {
+  import_volume_kbd: number;
+  import_bill_usd_mn_day: number;
+  import_bill_inr_crore_day: number;
+  inr_per_usd: number;
+  fx_source: string;
+  fx_date: string | null;
+}
+
 export interface SystemStatus {
   model_version: string;
   brent_usd: number;
   brent_source: string;
+  economics?: EconomicsTicker;
   feeds: Record<string, string>;
   alert_threshold: number;
   signals_seen: number;

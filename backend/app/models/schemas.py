@@ -200,5 +200,6 @@ class DecisionBrief(BaseModel):
     spr: Optional[SPRSchedule] = None
     narrative: str = ""                     # LLM/template narration of computed values
     narrative_source: str = "template"      # template | llm
+    economics: dict[str, Any] = {}          # ₹ cost-of-inaction vs plan premium
     elapsed_s: float = 0.0
     audit: dict[str, Any] = {}              # NFR7: inputs, model version, assumptions

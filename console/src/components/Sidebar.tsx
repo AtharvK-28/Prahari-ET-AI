@@ -17,6 +17,7 @@ export default function Sidebar() {
   const setView = useStore((s) => s.setView);
   const playReplay = useStore((s) => s.playReplay);
   const replaying = useStore((s) => s.replaying);
+  const fireStorm = useStore((s) => s.fireStorm);
 
   const agentState = (id: string): "processing" | "active" | "standby" => {
     if (id === "supervisor") return loopRunning ? "processing" : "active";
@@ -62,6 +63,15 @@ export default function Sidebar() {
           {replaying ? "⏵ REPLAYING…" : "⏵ REPLAY REAL WINDOW"}
         </button>
         <div className="replay-note">Jul 22 Iran–US tensions · 13 real GDELT signals · 40× speed</div>
+      </div>
+
+      <div className="side-section">
+        <div className="side-head">STRESS TEST</div>
+        <button className="btn-storm" onClick={fireStorm} disabled={loopRunning}
+          title="inject labelled demo bursts at Hormuz AND Bab el-Mandeb simultaneously — with two corridors over the risk ceiling, the Navigator must solve from Cape/Atlantic routes only. Proves the plan is computed live, not scripted.">
+          {loopRunning ? "⏳ SOLVING…" : "⛈ PERFECT STORM"}
+        </button>
+        <div className="replay-note">Hormuz + Bab el-Mandeb cut at once · compound crisis, solved live</div>
       </div>
 
       <div className="side-section">

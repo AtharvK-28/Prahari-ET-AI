@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
     tasks.append(asyncio.create_task(ofac.run()))
     tasks.append(asyncio.create_task(marine.run()))
     tasks.append(asyncio.create_task(fred.load_history()))
+    tasks.append(asyncio.create_task(fred.load_fx()))
     log.info("PRAHARI up — feeds: gdelt=%s ais=%s eia=%s llm=%s",
              s.gdelt_enabled, s.ais_live, s.eia_live, s.llm_available)
     yield

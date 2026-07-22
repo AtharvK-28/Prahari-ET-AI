@@ -37,15 +37,18 @@ interface PrahariState {
   voiceEnabled: boolean;
   replaying: boolean;
   manualLoop: boolean;   // modal auto-opens only for user-fired loops
+  xray: string | null;   // corridor whose CDP X-ray waterfall is open
 
   boot: () => Promise<void>;
   select: (id: string | null) => void;
+  setXray: (id: string | null) => void;
   setTab: (tab: "risk" | "scenario" | "plan") => void;
   setView: (view: "overview" | "sentinel" | "oracle" | "action") => void;
   setScenario: (s: ScenarioImpact) => void;
   setPlan: (p: ProcurementPlan) => void;
   setSpr: (s: SPRSchedule) => void;
   fireTrigger: () => Promise<void>;
+  fireStorm: () => Promise<void>;
   decide: (approve: boolean) => Promise<void>;
   setBriefOpen: (open: boolean) => void;
   toggleVoice: () => void;
@@ -87,6 +90,7 @@ export const useStore = create<PrahariState>((set, get) => ({
   voiceEnabled: false,
   replaying: false,
   manualLoop: false,
+  xray: null,
 
   boot: async () => {
     const [status, twin, corridorsRes, recent] = await Promise.all([
@@ -121,6 +125,7 @@ export const useStore = create<PrahariState>((set, get) => ({
   },
 
   select: (id) => set({ selectedCorridor: id }),
+  setXray: (xray) => set({ xray }),
   setTab: (tab) => set({ tab }),
   setView: (view) => set({ view }),
   setScenario: (scenario) => set({ scenario }),
@@ -132,6 +137,16 @@ export const useStore = create<PrahariState>((set, get) => ({
           brief: null, briefOpen: false, manualLoop: true });
     try {
       await api.trigger();
+    } catch {
+      set({ loopRunning: false });
+    }
+  },
+
+  fireStorm: async () => {
+    set({ loopRunning: true, loopStarted: Date.now(), loopElapsed: 0, stages: [],
+          brief: null, briefOpen: false, manualLoop: true });
+    try {
+      await api.perfectStorm();
     } catch {
       set({ loopRunning: false });
     }
@@ -211,6 +226,8 @@ function connectWS(set: any, get: any) {
         // only a user-fired trigger pops the modal
         set({ brief: msg.brief, briefOpen: get().manualLoop,
               loopRunning: false, manualLoop: false });
+        // refresh the ₹ import-bill ticker right away (demo spike moved Brent)
+        api.status().then((s) => set({ status: s })).catch(() => {});
         if (get().voiceEnabled) {
           const b = msg.brief;
           const s = b.scenario;

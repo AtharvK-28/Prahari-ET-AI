@@ -1,4 +1,5 @@
-// PRAHARI — footer status ticker: brent tick, worst chokepoint, signal count
+// PRAHARI — footer status ticker: brent tick, ₹ import bill, worst chokepoint
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../store";
 
 export default function StatusBar() {
@@ -12,6 +13,22 @@ export default function StatusBar() {
   const brentBadge = status?.brent_source === "eia_live" || status?.brent_source === "fred_daily"
     ? "LIVE" : status?.brent_source === "demo" ? "DEMO" : "SEED";
 
+  // flash the import bill when it jumps (Brent shock hits the wallet visibly)
+  const econ = status?.economics;
+  const prevBill = useRef<number | null>(null);
+  const [flash, setFlash] = useState(false);
+  useEffect(() => {
+    const bill = econ?.import_bill_usd_mn_day ?? null;
+    if (bill !== null && prevBill.current !== null &&
+        Math.abs(bill - prevBill.current) / prevBill.current > 0.005) {
+      setFlash(true);
+      const t = setTimeout(() => setFlash(false), 2200);
+      return () => clearTimeout(t);
+    }
+    prevBill.current = bill;
+  }, [econ?.import_bill_usd_mn_day]);
+  useEffect(() => { prevBill.current = econ?.import_bill_usd_mn_day ?? null; });
+
   return (
     <footer className="statusbar">
       <span className="sb-item">
@@ -19,6 +36,14 @@ export default function StatusBar() {
         <span className="sb-val">${status?.brent_usd?.toFixed(2) ?? "—"}</span>
         <span className={`badge badge-${brentBadge === "LIVE" ? "live" : brentBadge === "DEMO" ? "demo" : "static"}`}>{brentBadge}</span>
       </span>
+      {econ && (
+        <span className={`sb-item sb-bill ${flash ? "sb-flash" : ""}`}
+          title={`${econ.import_volume_kbd.toLocaleString()} kbd imports (PPAC-verified) × Brent × ₹${econ.inr_per_usd.toFixed(2)}/$ (${econ.fx_source === "fred_dexinus" ? `FRED DEXINUS ${econ.fx_date}` : "seed rate — tagged"})`}>
+          <span className="sb-key">IMPORT_BILL:</span>{" "}
+          <span className="sb-val">${econ.import_bill_usd_mn_day.toFixed(0)}M/day</span>
+          <span className="sb-inr">₹{econ.import_bill_inr_crore_day.toLocaleString("en-IN")} cr/day</span>
+        </span>
+      )}
       {worst && (
         <span className="sb-item">
           <span className="sb-key">TOP_RISK_CORRIDOR:</span>{" "}

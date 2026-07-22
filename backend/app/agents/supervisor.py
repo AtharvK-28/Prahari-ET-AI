@@ -66,13 +66,15 @@ async def run_loop(corridor_id: str, emit: Emit, cut_pct: float = 50.0,
     impact, plan, schedule, trigger = (brief.scenario, brief.procurement,
                                        brief.spr, brief.trigger)
     brief.narrative, brief.narrative_source = await _narrate(brief)
+    brief.economics = _economics(brief)
     brief.elapsed_s = round(time.perf_counter() - t0, 1)
     brief.audit = {   # NFR7
         "model_version": MODEL_VERSION,
         "orchestrator": "langgraph" if _HAS_LANGGRAPH else "sequential",
         "inputs": trigger,
         "scenario_request": scen_req.model_dump(), "assumptions": impact.assumptions,
-        "navigator_params": plan.params, "created_at": now_ts(),
+        "navigator_params": plan.params, "economics": brief.economics,
+        "created_at": now_ts(),
     }
     BRIEFS[brief.brief_id] = brief
     _audit_write(brief)
@@ -123,6 +125,34 @@ async def _run_sequential(corridor_id: str, emit: Emit, cut_pct: float,
     brief = DecisionBrief(trigger=trigger, scenario=impact,
                           procurement=plan, spr=schedule)
     return brief, scen_req
+
+
+def _economics(brief: DecisionBrief) -> dict[str, Any]:
+    """₹ cost-of-inaction vs plan premium, derived from figures already computed.
+
+    - inaction: the Oracle's unmitigated import-bill shock, expressed per day
+    - premium:  extra $/bbl actually paid on the Navigator's rerouted barrels
+    Both converted at the live FRED INR rate (tagged seed_fallback without key).
+    """
+    from ..ingestion.fred import FX
+    s = brief.scenario
+    dur = float(s.event.get("duration_days") or 30)
+    inaction_mn_day = s.import_bill_shock_usd_bn * 1000.0 / dur
+    premium_mn_day = sum(a.landed_premium_usd * a.allocated_kbd * 1000.0
+                         for a in brief.procurement.ranked
+                         if a.allocated_kbd > 0) / 1e6
+    inr = float(FX["inr_per_usd"])
+    return {
+        "inr_per_usd": inr, "fx_source": FX["source"],
+        "cost_of_inaction_usd_mn_day": round(inaction_mn_day, 1),
+        "cost_of_inaction_inr_crore_day": round(inaction_mn_day * inr / 10.0, 0),
+        "plan_premium_usd_mn_day": round(premium_mn_day, 1),
+        "plan_premium_inr_crore_day": round(premium_mn_day * inr / 10.0, 1),
+        "note": ("unmitigated import-bill shock per day (Oracle) vs premium paid "
+                 "on rerouted barrels (Navigator); ₹ at "
+                 + ("live FRED DEXINUS" if FX["source"] == "fred_dexinus"
+                    else "tagged seed rate")),
+    }
 
 
 # ---------------------------------------------------------------- narrative

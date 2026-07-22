@@ -33,6 +33,22 @@ def _marine_status() -> str:
     return f"live ({len(WEATHER)} corridors)" if WEATHER else "warming up"
 
 
+def _economics() -> dict:
+    """Live import-bill: Brent × PPAC-verified import volume × live INR rate."""
+    from ..ingestion.fred import FX
+    imp_kbd = float(KG.seed["national"]["import_volume_kbd"])
+    usd_mn_day = PRICE.brent_usd * imp_kbd * 1000.0 / 1e6
+    inr = float(FX["inr_per_usd"])
+    return {
+        "import_volume_kbd": imp_kbd,
+        "import_bill_usd_mn_day": round(usd_mn_day, 1),
+        "import_bill_inr_crore_day": round(usd_mn_day * inr / 10.0, 0),  # $1M = ₹inr/10 cr
+        "inr_per_usd": inr,
+        "fx_source": FX["source"],
+        "fx_date": FX["date"],
+    }
+
+
 # ------------------------------------------------------------------ sensing
 @router.get("/status")
 def status() -> dict:
@@ -41,6 +57,7 @@ def status() -> dict:
         "model_version": "prahari-mvp-0.1",
         "brent_usd": PRICE.brent_usd,
         "brent_source": PRICE.source,
+        "economics": _economics(),
         "feeds": {
             "gdelt": "live" if s.gdelt_enabled else "off",
             "ais": "live" if s.ais_live else "off (no key)",
@@ -182,6 +199,51 @@ async def trigger(payload: dict | None = None) -> dict:
         return {"brief_id": brief.brief_id,
                 "elapsed_s": round(time.perf_counter() - t0, 1),
                 "under_60s": (time.perf_counter() - t0) < 60}
+
+
+@router.post("/supervisor/perfect_storm")
+async def perfect_storm() -> dict:
+    """Compound-crisis stress test: Hormuz AND Bab el-Mandeb hit simultaneously.
+
+    Injects labelled demo bursts at BOTH chokepoints (mode=demo, NFR3), then
+    runs the full loop. With two corridors above the Navigator's risk ceiling,
+    the feasible set shrinks to Cape/Atlantic routes — proving the plan is
+    solved live, not scripted for a single rehearsed scenario.
+    """
+    if _loop_lock.locked():
+        raise HTTPException(409, "a loop is already running")
+    async with _loop_lock:
+        t0 = time.perf_counter()
+        bursts: list[tuple[str, list[str], list[tuple[str, float, float, str]]]] = [
+            ("hormuz", ["pg_west_india", "pg_east_india"], [
+                ("conflict_event", 0.85, 0.90, "DEMO: naval incident reported near Strait of Hormuz"),
+                ("ais_anomaly",    0.80, 0.85, "DEMO: 3 laden VLCCs reverse course south of Hormuz"),
+            ]),
+            ("bab_el_mandeb", ["redsea_west_india", "usgc_suez_india"], [
+                ("conflict_event", 0.80, 0.85, "DEMO: missile attack on tanker transiting Bab el-Mandeb"),
+                ("ais_anomaly",    0.75, 0.80, "DEMO: Red Sea transits diverting to Cape; AIS dark cluster"),
+            ]),
+        ]
+        for cp, corridor_ids, specs in bursts:
+            for type_, mag, conf, summary in specs:
+                await BUS.publish(Signal(
+                    source="demo", mode=SignalMode.demo, type=SignalType(type_),
+                    chokepoint_id=cp, corridor_ids=corridor_ids,
+                    magnitude=mag, confidence=conf, summary=summary))
+                await asyncio.sleep(0.12)
+        apply_demo_spike(9.8)          # compound spike — inside the FRED shock envelope
+        await BUS.publish(Signal(
+            source="demo", mode=SignalMode.demo, type=SignalType.price_move,
+            magnitude=0.90, confidence=0.95,
+            summary="DEMO: Brent +9.8% — twin chokepoint stress"))
+        await asyncio.sleep(0.3)
+
+        brief = await supervisor.run_loop("pg_west_india", MANAGER.broadcast,
+                                          cut_pct=60.0)
+        return {"brief_id": brief.brief_id,
+                "elapsed_s": round(time.perf_counter() - t0, 1),
+                "under_60s": (time.perf_counter() - t0) < 60,
+                "storm": True}
 
 
 @router.get("/brief/{brief_id}")

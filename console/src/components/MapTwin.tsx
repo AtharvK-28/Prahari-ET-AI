@@ -108,7 +108,20 @@ export default function MapTwin() {
       .filter(Boolean) as any[];
   }, [plan, twin]);
 
-  const cutCorridor = brief?.trigger?.corridor ?? null;
+  // cut corridors: the brief's trigger + any corridor hit by a recent
+  // high-magnitude demo burst (Perfect Storm cuts two chokepoints at once)
+  const cutCorridors = useMemo(() => {
+    const set = new Set<string>();
+    if (brief?.trigger?.corridor) set.add(brief.trigger.corridor);
+    const now = Date.now() / 1000;
+    for (const s of signals) {
+      if (s.mode === "demo" && now - s.ts < 240 && s.magnitude >= 0.7 &&
+          (s.type === "conflict_event" || s.type === "ais_anomaly"))
+        s.corridor_ids.forEach((c) => set.add(c));
+    }
+    return set;
+  }, [brief, signals]);
+  const cutKey = useMemo(() => [...cutCorridors].sort().join(","), [cutCorridors]);
 
   // sim fleet: geometry once per twin; positions every frame (Little's law)
   const fleetGeoms = useMemo(() => (twin ? buildFleetGeometry(twin) : []), [twin]);
@@ -116,14 +129,14 @@ export default function MapTwin() {
     // the "VLCCs reverse course" signal, made visible for ~25 s
     const now = Date.now() / 1000;
     return signals.some((s) => s.type === "ais_anomaly" &&
-      /reverse/i.test(s.summary) && now - s.ts < 25);
+      /revers|divert/i.test(s.summary) && now - s.ts < 25);
   }, [signals]);
   const recoveryCorridors = useMemo(
     () => new Set((plan?.ranked ?? []).filter((a) => a.allocated_kbd > 0).map((a) => a.corridor)),
     [plan]);
   const fleet = useMemo(
-    () => fleetAt(fleetGeoms, timeS, cutCorridor, reversalActive, recoveryCorridors),
-    [fleetGeoms, timeS, cutCorridor, reversalActive, recoveryCorridors]);
+    () => fleetAt(fleetGeoms, timeS, cutCorridors, reversalActive, recoveryCorridors),
+    [fleetGeoms, timeS, cutCorridors, reversalActive, recoveryCorridors]);
 
   const layers = useMemo(() => {
     if (!twin) return [];
@@ -170,19 +183,19 @@ export default function MapTwin() {
         currentTime: clock + 1 / 3,      // particles always mid-path somewhere
         trailLength: 0.18,
         getColor: (d: any) =>
-          d.id === cutCorridor
+          cutCorridors.has(d.id)
             ? [235, 87, 87, 230]
             : [140, 235, 255, Math.min(220, 90 + d.supply / 6)],
         getWidth: (d: any) => 2 + Math.min(d.supply / 250, 5),
         widthUnits: "pixels",
         capRounded: true,
         jointRounded: true,
-        updateTriggers: { currentTime: [clock], getColor: [cutCorridor] },
+        updateTriggers: { currentTime: [clock], getColor: [cutKey] },
       }),
-      // triggered corridor: pulsing overlay so the cut reads instantly
-      !cutCorridor ? null : new PathLayer({
+      // triggered corridors: pulsing overlay so the cut reads instantly
+      cutCorridors.size === 0 ? null : new PathLayer({
         id: "cut-pulse",
-        data: paths.filter((f: any) => f.properties.id === cutCorridor),
+        data: paths.filter((f: any) => cutCorridors.has(f.properties.id)),
         getPath: (f: any) => f.geometry.coordinates,
         getColor: [235, 87, 87, 70 + Math.abs(Math.sin(clock * Math.PI * 6)) * 110],
         getWidth: 8,
@@ -269,7 +282,7 @@ export default function MapTwin() {
           const [r, g, b] = FLEET_COLORS[v.state];
           return [r, g, b, v.state === "normal" ? 55 : 105];
         },
-        updateTriggers: { getPosition: [timeS], getFillColor: [cutCorridor, reversalActive, recoveryCorridors], getRadius: [cutCorridor, reversalActive] },
+        updateTriggers: { getPosition: [timeS], getFillColor: [cutKey, reversalActive, recoveryCorridors], getRadius: [cutKey, reversalActive] },
       }),
       // sim fleet: heading-rotated tanker glyphs (Little's-law counts, SIM-tagged)
       new TextLayer({
@@ -295,7 +308,7 @@ export default function MapTwin() {
             x: info.x, y: info.y,
             text: `⛴ SIM VLCC (${{ normal: "en route", queued: "HOLDING — chokepoint cut", reversing: "REVERSING COURSE", recovery: "reroute cargo" }[info.object.state as string]}) · ${info.object.corridorName} — Little's law: ${info.object.supply} kbd × ${info.object.transit}d ÷ ${VLCC_KBBL / 1000} Mbbl ≈ ${info.object.fleetCount} vessels`,
           } : null),
-        updateTriggers: { getPosition: [timeS], getAngle: [timeS], getColor: [cutCorridor, reversalActive, recoveryCorridors], getSize: [cutCorridor, reversalActive] },
+        updateTriggers: { getPosition: [timeS], getAngle: [timeS], getColor: [cutKey, reversalActive, recoveryCorridors], getSize: [cutKey, reversalActive] },
       }),
       // live AIS overlay (white, distinct from sim glyphs) — when the feed is up
       new ScatterplotLayer({
@@ -323,8 +336,8 @@ export default function MapTwin() {
         fontFamily: "Inter, system-ui, sans-serif",
       }),
     ].filter(Boolean);
-  }, [twin, corridors, vessels, selected, select, trips, clock, timeS, cutCorridor,
-      rerouteArcs, fleet, reversalActive, recoveryCorridors]);
+  }, [twin, corridors, vessels, selected, select, trips, clock, timeS, cutCorridors,
+      cutKey, rerouteArcs, fleet, reversalActive, recoveryCorridors]);
 
   return (
     <div className="map-wrap">

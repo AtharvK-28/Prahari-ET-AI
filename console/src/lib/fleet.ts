@@ -83,13 +83,14 @@ function pointAt(g: CorridorGeom, p: number): { pos: [number, number]; bearing: 
 
 /**
  * Fleet snapshot at wall-time `timeS`.
- *  - cutCorridor: vessels queue short of the chokepoint (red) — a blockade you can see
- *  - reversalUntilS: for its duration, the 3 lead vessels on the cut corridor
+ *  - cutCorridors: vessels queue short of the chokepoint (red) — a blockade you
+ *    can see; supports compound crises (Perfect Storm cuts two chokepoints)
+ *  - reversalActive: for its duration, the 3 lead vessels on each cut corridor
  *    steam backwards (the "3 laden VLCCs reverse course" signal, made visible)
  *  - recoveryCorridors: Navigator-allocated corridors — vessels run green
  */
 export function fleetAt(
-  geoms: CorridorGeom[], timeS: number, cutCorridor: string | null,
+  geoms: CorridorGeom[], timeS: number, cutCorridors: Set<string>,
   reversalActive: boolean, recoveryCorridors: Set<string>,
 ): SimVessel[] {
   const out: SimVessel[] = [];
@@ -99,7 +100,7 @@ export function fleetAt(
       let p = (g.phases[i] + timeS / loopS) % 1;
       let state: SimVessel["state"] = "normal";
       let bearingFlip = 0;
-      if (g.id === cutCorridor) {
+      if (cutCorridors.has(g.id)) {
         const hold = 0.26 - i * 0.035;           // stack short of the chokepoint
         if (reversalActive && i < 3) {
           state = "reversing";

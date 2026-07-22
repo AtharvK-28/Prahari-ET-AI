@@ -10,6 +10,7 @@ function CorridorRow({ c }: { c: CorridorState }) {
   const select = useStore((s) => s.select);
   const selected = useStore((s) => s.selectedCorridor);
   const weather = useStore((s) => s.weather[c.corridor_id]);
+  const setXray = useStore((s) => s.setXray);
   const open = selected === c.corridor_id;
 
   return (
@@ -27,6 +28,10 @@ function CorridorRow({ c }: { c: CorridorState }) {
       {open && (
         <div className="corridor-detail">
           <div className="detail-meta">
+            <button className="btn-xray"
+              onClick={(e) => { e.stopPropagation(); setXray(c.corridor_id); }}>
+              ⊕ X-RAY
+            </button>
             <span>band <b className={BAND_CLASS[c.band]}>{c.band}</b></span>
             <span>confidence <b>{(c.confidence * 100).toFixed(0)}%</b></span>
             <span>baseline <b>{c.baseline_risk.toFixed(2)}</b></span>

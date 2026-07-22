@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import StatusBar from "./components/StatusBar";
 import SignalTicker from "./components/SignalTicker";
 import BriefCard from "./components/BriefCard";
+import CdpXray from "./components/CdpXray";
 import OverviewView from "./views/OverviewView";
 import SentinelView from "./views/SentinelView";
 import OracleView from "./views/OracleView";
@@ -37,6 +38,7 @@ export default function App() {
       <SignalTicker />
       <StatusBar />
       <BriefCard />
+      <CdpXray />
     </div>
   );
 }

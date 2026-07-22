@@ -32,6 +32,8 @@ export const api = {
   calibration: () => get<import("./types").ShockCalibration>("/calibration/shocks"),
   weather: () => get<{ corridors: Record<string, import("./types").CorridorWeather> }>("/weather"),
   trigger: () => post<{ brief_id: string; elapsed_s: number }>("/supervisor/trigger", {}),
+  perfectStorm: () =>
+    post<{ brief_id: string; elapsed_s: number; storm: boolean }>("/supervisor/perfect_storm", {}),
   brief: (id: string) => get<import("./types").DecisionBrief>(`/brief/${id}`),
   decide: (id: string, approve: boolean) =>
     post<import("./types").DecisionBrief>(`/brief/${id}/approve`, { approve }),
