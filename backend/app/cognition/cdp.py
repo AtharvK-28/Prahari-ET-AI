@@ -138,6 +138,19 @@ class CDPEngine:
     def all_states(self) -> list[CorridorState]:
         return [self.state(cid) for cid in self.corridors]
 
+    def reset(self) -> None:
+        """Rehearsal reset: forget all accumulated signal influence.
+
+        Corridors fall back to their structural baselines; live feeds keep
+        running, so real news will re-elevate the board organically (FR10).
+        """
+        self.components = {
+            cid: {f: _Component(self.halflife) for f in ("geo", "ais", "sanctions", "market")}
+            for cid in self.corridors
+        }
+        self.first_physical_signal.clear()
+        self.alert_active = {cid: False for cid in self.corridors}
+
     def crossed_threshold(self, corridor_id: str) -> bool:
         """True exactly once per excursion above the alert threshold."""
         st = self.state(corridor_id)

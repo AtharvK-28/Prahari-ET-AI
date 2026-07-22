@@ -18,6 +18,7 @@ export default function Sidebar() {
   const playReplay = useStore((s) => s.playReplay);
   const replaying = useStore((s) => s.replaying);
   const fireStorm = useStore((s) => s.fireStorm);
+  const resetBoard = useStore((s) => s.resetBoard);
 
   const agentState = (id: string): "processing" | "active" | "standby" => {
     if (id === "supervisor") return loopRunning ? "processing" : "active";
@@ -72,6 +73,10 @@ export default function Sidebar() {
           {loopRunning ? "⏳ SOLVING…" : "⛈ PERFECT STORM"}
         </button>
         <div className="replay-note">Hormuz + Bab el-Mandeb cut at once · compound crisis, solved live</div>
+        <button className="btn-reset" onClick={resetBoard} disabled={loopRunning}
+          title="forget accumulated signal influence (demo bursts, replays, decayed news) for a calm rehearsal board — live feeds keep running, so genuinely hot real news will re-elevate corridors within minutes">
+          ↺ RESET BOARD
+        </button>
       </div>
 
       <div className="side-section">

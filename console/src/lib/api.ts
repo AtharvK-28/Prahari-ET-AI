@@ -34,6 +34,7 @@ export const api = {
   trigger: () => post<{ brief_id: string; elapsed_s: number }>("/supervisor/trigger", {}),
   perfectStorm: () =>
     post<{ brief_id: string; elapsed_s: number; storm: boolean }>("/supervisor/perfect_storm", {}),
+  resetBoard: () => post<{ reset: boolean }>("/demo/reset", {}),
   brief: (id: string) => get<import("./types").DecisionBrief>(`/brief/${id}`),
   decide: (id: string, approve: boolean) =>
     post<import("./types").DecisionBrief>(`/brief/${id}/approve`, { approve }),

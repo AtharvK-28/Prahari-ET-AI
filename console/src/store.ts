@@ -49,6 +49,7 @@ interface PrahariState {
   setSpr: (s: SPRSchedule) => void;
   fireTrigger: () => Promise<void>;
   fireStorm: () => Promise<void>;
+  resetBoard: () => Promise<void>;
   decide: (approve: boolean) => Promise<void>;
   setBriefOpen: (open: boolean) => void;
   toggleVoice: () => void;
@@ -152,6 +153,14 @@ export const useStore = create<PrahariState>((set, get) => ({
     }
   },
 
+  resetBoard: async () => {
+    try {
+      await api.resetBoard();
+      const s = await api.status();
+      set({ status: s });
+    } catch { /* loop running — try again in a moment */ }
+  },
+
   decide: async (approve) => {
     const { brief } = get();
     if (!brief) return;
@@ -200,6 +209,11 @@ function connectWS(set: any, get: any) {
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data);
     switch (msg.event) {
+      case "board_reset":
+        // rehearsal reset: server forgot accumulated signal influence
+        set({ signals: [], brief: null, briefOpen: false, plan: null, spr: null,
+              scenario: null, stages: [], loopRunning: false });
+        break;
       case "signal":
         set((st: PrahariState) => ({ signals: [msg.signal, ...st.signals].slice(0, 80) }));
         break;

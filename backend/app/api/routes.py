@@ -11,7 +11,7 @@ from ..cognition.cdp import ENGINE
 from ..config import get_settings, model_config, seed_data
 from ..ingestion import replay
 from ..ingestion.ais import VESSELS
-from ..ingestion.brent import PRICE, apply_demo_spike
+from ..ingestion.brent import PRICE, apply_demo_spike, reset_demo
 from ..ingestion.bus import BUS
 from ..knowledge.graph import KG
 from ..models.schemas import (ProcurementRequest, ScenarioRequest, Signal,
@@ -276,6 +276,26 @@ def weather() -> dict:
     """Live corridor sea state (Open-Meteo Marine) + delay factors."""
     from ..ingestion.marine import WEATHER
     return {"corridors": WEATHER}
+
+
+# ------------------------------------------------------------------ rehearsal
+@router.post("/demo/reset")
+async def demo_reset() -> dict:
+    """Calm the board for rehearsal: forget accumulated signal influence.
+
+    Clears the CDP engine's decaying components, the signal history, and any
+    demo Brent spike. Live feeds keep running — if the real world is hot,
+    GDELT will re-elevate corridors within minutes, which is the point (FR10).
+    """
+    if _loop_lock.locked():
+        raise HTTPException(409, "a loop is running — wait for it to finish")
+    ENGINE.reset()
+    BUS.history.clear()
+    reset_demo()
+    await MANAGER.broadcast({"event": "board_reset"})
+    for st in ENGINE.all_states():
+        await MANAGER.broadcast({"event": "cdp_update", "state": st.model_dump()})
+    return {"reset": True, "brent_usd": PRICE.brent_usd, "brent_source": PRICE.source}
 
 
 # -------------------------------------------------------------------- replay

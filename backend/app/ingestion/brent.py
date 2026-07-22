@@ -101,3 +101,12 @@ def apply_demo_spike(pct: float) -> None:
     base = _pre_demo_price if _pre_demo_price is not None else PRICE.brent_usd
     PRICE.brent_usd = round(base * (1 + pct / 100.0), 2)
     PRICE.source = "demo"
+
+
+def reset_demo() -> None:
+    """Board reset: drop any demo spike back to the last real price."""
+    global _pre_demo_price
+    if PRICE.source == "demo" and _pre_demo_price is not None:
+        PRICE.brent_usd = _pre_demo_price
+        PRICE.source = "eia_live" if get_settings().eia_live else "seed_baseline"
+    _pre_demo_price = None
