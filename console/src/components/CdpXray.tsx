@@ -107,7 +107,8 @@ export default function CdpXray() {
               every term of σ(scale·(Σ wᵢ·factorᵢ + 0.55·baseline) + bias), live
             </span>
           </div>
-          <span className={`cdp-num band-${corridor.band}`} style={{ fontSize: 22 }}>
+          <span className={`cdp-num band-${corridor.band}`}
+            style={{ fontSize: 22, flexShrink: 0, width: "auto", marginLeft: 10 }}>
             {(corridor.cdp * 100).toFixed(1)}%
           </span>
         </div>

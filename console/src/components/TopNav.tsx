@@ -31,7 +31,7 @@ export default function TopNav() {
   return (
     <header className={`topnav ${inCrisis ? "topnav-crisis" : ""}`}>
       <div className="brand">
-        <span className="brand-shield">🛡</span>
+        <span className="brand-shield">⬡</span>
         <span className="brand-name">PRAHARI</span>
       </div>
       <nav className="viewnav">
